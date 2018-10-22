@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<block>
+  <name>Packet number inserter</name>
+  <key>learning_packet_header</key>
+  <category>[learning]</category>
+  <import>import learning</import>
+  <make>learning.packet_header($header_byte_length, $preamble_byte_length, $tag_name, $payload_byte_length)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>Header byte length</name>
+    <key>header_byte_length</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Preamble byte length</name>
+    <key>preamble_byte_length</key>
+    <value>5</value>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Tag name</name>
+    <key>tag_name</key>
+    <value>"step"</value>
+    <type>string</type>
+  </param>
+  <param>
+    <name>Payload byte length</name>
+    <key>payload_byte_length</key>
+    <value>10</value>
+    <type>int</type>
+  </param>
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>byte</type>
+  </source>
+</block>

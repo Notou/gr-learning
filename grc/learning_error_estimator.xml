@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<block>
+  <name>Error estimator</name>
+  <key>learning_error_estimator</key>
+  <category>[learning]</category>
+  <import>import learning</import>
+  <make>learning.error_estimator($tag_name, $interval, $(type.fcn), $(packet_loss_penalty))</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+   <param>
+     <name>Tag Name</name>
+     <key>tag_name</key>
+     <type>string</type>
+   </param>
+
+   <param>
+   		<name>IO Type</name>
+   		<key>type</key>
+   		<type>enum</type>
+   		<option>
+   			<name>Complex</name>
+   			<key>complex</key>
+   			<opt>fcn:"cc"</opt>
+   		</option>
+   		<option>
+   			<name>Float</name>
+   			<key>float</key>
+   			<opt>fcn:"ff"</opt>
+   		</option>
+   		<option>
+   			<name>Int</name>
+   			<key>int</key>
+   			<opt>fcn:"ii"</opt>
+   		</option>
+   		<option>
+   			<name>Byte</name>
+   			<key>byte</key>
+   			<opt>fcn:"bb"</opt>
+   		</option>
+   	</param>
+
+   <param>
+     <name>Frame size</name>
+     <key>interval</key>
+     <value>100</value>
+     <type>int</type>
+   </param>
+
+   <param>
+     <name>Packet loss penalty</name>
+     <key>packet_loss_penalty</key>
+     <value>10</value>
+     <type>float</type>
+   </param>
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+   <sink>
+     <name>reference</name>
+     <type>$type</type>
+     <nports>1</nports>
+   </sink>
+  <sink>
+    <name>signal</name>
+    <type>$type</type>
+    <nports>1</nports>
+  </sink>
+  <source>
+    <name>error</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+
+</block>
