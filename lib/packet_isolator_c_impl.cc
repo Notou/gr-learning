@@ -134,11 +134,7 @@ namespace gr {
         //out[i*d_pack_length:(i+1)*d_pack_length] = in[position-d_preamble_length:position+d_payload_length]
 
         //Write a tag at the beginning of the payload
-<<<<<<< HEAD
         tag_offset = written + tags_considered*d_pack_length + (d_preamble_length*d_transmit_preamble);
-=======
-        tag_offset = written + tags_considered*d_pack_length + (relevant_tag.offset - history_read - (position+(d_preamble_length*d_transmit_preamble)));
->>>>>>> ee6bac4921eea12d905e2f38e39145c05fd11407
         add_item_tag(0, tag_offset, pmt::intern("header_start"), pmt::from_long(0));
 
 
