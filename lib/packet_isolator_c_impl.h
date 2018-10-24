@@ -46,6 +46,7 @@ namespace gr {
        int output_number;
        uint64_t position;
        uint64_t tag_offset;
+       tag_t d_relevant_tag;
 
      public:
       packet_isolator_c_impl(int payload_length, int preamble_length, int lookup_window, char* tag_name);
