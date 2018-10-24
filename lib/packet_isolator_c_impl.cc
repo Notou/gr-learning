@@ -97,8 +97,8 @@ namespace gr {
 
       //std::vector<tag_t> relevant_tags;
       //get_tags_in_range(relevant_tags, 0,  history_read + d_preamble_length , max_offset);
-      tag_t relevant_tag;
-      int i=0;
+
+      int tags_considered =0;
       // printf("%s %d\n", "Tag number: ", tags.size());
       //printf("%s %d\n", "Total tag number: ", relevant_tags.size());
       //printf("%s %d to %d\n", "Search range: ", history_read + d_preamble_length, max_offset);
@@ -106,14 +106,17 @@ namespace gr {
         if(tags[i].offset > max_tag_offset){ //Just in case
           break;
         }
-        relevant_tag = tags[i];
-        for(int j=1; i+j < tags.size();j++){
-          if(tags[i+j].offset > tags[i].offset + d_lookup_window){
+        if(tags[i].offset > d_relevant_tag.offset + d_lookup_window){
+          d_relevant_tag = tags[i];
+        }
+        for(int j=i + 1; j < tags.size();j++){
+          if(tags[j].offset > d_relevant_tag.offset + d_lookup_window){
+            i = j-1;
             break;
           }
 
-          if (pmt::to_double(relevant_tag.value) < pmt::to_double(tags[i+j].value)){
-            relevant_tag = tags[i+j];
+          if (pmt::to_double(d_relevant_tag.value) < pmt::to_double(tags[j].value)){
+            d_relevant_tag = tags[j];
           }
         }
 
@@ -127,14 +130,15 @@ namespace gr {
           return output_number - d_pack_length;
         }
         //Forward a slice of inputs
-        memcpy(out + i*d_pack_length, in + position+(d_preamble_length*(!d_transmit_preamble)), d_pack_length * sizeof(gr_complex));
+        memcpy(out + tags_considered*d_pack_length, in + position+(d_preamble_length*(!d_transmit_preamble)), d_pack_length * sizeof(gr_complex));
         //out[i*d_pack_length:(i+1)*d_pack_length] = in[position-d_preamble_length:position+d_payload_length]
 
         //Write a tag at the beginning of the payload
-        tag_offset = written + i*d_pack_length + (relevant_tag.offset - history_read - (position+(d_preamble_length*d_transmit_preamble)));
+        tag_offset = written + tags_considered*d_pack_length + (relevant_tag.offset - history_read - (position+(d_preamble_length*d_transmit_preamble)));
         add_item_tag(0, tag_offset, pmt::intern("header_start"), pmt::from_long(0));
 
 
+        tags_considered ++;
 
       }
 
