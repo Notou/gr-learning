@@ -45,6 +45,7 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex)))
     {
       d_transmit_preamble = 0;
+      last_transmitted_offset = 0;
       d_payload_length = payload_length;
       d_preamble_length = preamble_length;
       d_lookup_window = lookup_window;
@@ -53,7 +54,7 @@ namespace gr {
       set_tag_propagation_policy(TPP_DONT);
       set_history(std::max(d_preamble_length, d_lookup_window)+d_payload_length);
       set_min_noutput_items(d_pack_length *5);
-
+      set_output_multiple(d_pack_length);
 
     }
 
@@ -82,9 +83,7 @@ namespace gr {
       read = nitems_read(0);
       history_read = (read - history());
       max_offset = read + ninput_items[0];
-      // printf("%s %d\n", "Work starting. Input samples: ", ninput_items[0]);
-      // printf("%s %d %s %d\n", "History: ", history(), "History read:", history_read);
-      // printf("%s %d %s %d\n", "Item read: ", read, "length:", d_pack_length);
+      
       //We don't want to process tags so close to the end of the input array that we don't have access to the payload samples
       max_tag_offset = max_offset - d_payload_length - d_preamble_length - d_lookup_window;
 
@@ -99,34 +98,44 @@ namespace gr {
       //get_tags_in_range(relevant_tags, 0,  history_read + d_preamble_length , max_offset);
 
       int tags_considered =0;
-      // printf("%s %d\n", "Tag number: ", tags.size());
+      //printf("%s %lu\n", "Tag number: ", tags.size());
       //printf("%s %d\n", "Total tag number: ", relevant_tags.size());
       //printf("%s %d to %d\n", "Search range: ", history_read + d_preamble_length, max_offset);
       for(int i=0; i < tags.size();i++){
         if(tags[i].offset > max_tag_offset){ //Just in case
           break;
         }
+        //printf("i=%d %lu %lu \n",i, tags[i].offset, d_relevant_tag.offset + d_lookup_window);
         if(tags[i].offset > d_relevant_tag.offset + d_lookup_window){
           d_relevant_tag = tags[i];
         }
-        for(int j=i + 1; j < tags.size();j++){
+        for(int j =i + 1; j < tags.size();j++){
+          //printf("%s %d\n", "j=", j);
           if(tags[j].offset > d_relevant_tag.offset + d_lookup_window){
-            i = j-1;
+
+            //printf("%s %d\n", "i should be: ", i);
             break;
           }
 
           if (pmt::to_double(d_relevant_tag.value) < pmt::to_double(tags[j].value)){
             d_relevant_tag = tags[j];
+
           }
+          i++;
         }
 
-
+        if(d_relevant_tag.offset <= last_transmitted_offset + d_lookup_window){
+          printf("%s %lu %lu\n", "We wanted to transmit twice this offset:", last_transmitted_offset + d_lookup_window, d_relevant_tag.offset);
+          continue;
+        }
+        //printf("%s %d\n", "i is: ", i);
         position = d_relevant_tag.offset - history_read; //Position of the tag relative to the input array
 
         output_number += d_pack_length;
         if (output_number > noutput_items){ //We don't want to write more than the size of the output array
           consume_each(position);
-          // printf("%s %d %s %d %s %d %s %d\n", "Work finishing early. Output samples: ", output_number, "consumed:", position-history()+1, "Output number:", noutput_items, "position:", position);
+        //add_item_tag(0, written + output_number - d_pack_length, pmt::intern("Small output"), pmt::from_long(0));
+          //printf("%s %d %s %d %s %d %s %lu\n", "Work finishing early. Output samples: ", output_number, "consumed:", position, "Output number:", noutput_items, "position:", position);
           return output_number - d_pack_length;
         }
         //Forward a slice of inputs
@@ -135,11 +144,11 @@ namespace gr {
 
         //Write a tag at the beginning of the payload
         tag_offset = written + tags_considered*d_pack_length + (d_preamble_length*d_transmit_preamble);
-        add_item_tag(0, tag_offset, pmt::intern("header_start"), pmt::from_long(0));
-
+        //add_item_tag(0, tag_offset, pmt::intern("header_start"), pmt::mp(d_relevant_tag.offset));
+        //add_item_tag(0, tag_offset, pmt::intern("header_value"), d_relevant_tag.value);
 
         tags_considered ++;
-
+        last_transmitted_offset = d_relevant_tag.offset;
       }
 
 
@@ -156,9 +165,9 @@ namespace gr {
       // Tell runtime system how many input items we consumed on
       // each input stream.
       consume_each(ninput_items[0]);
-
+      //add_item_tag(0, written + output_number, pmt::intern("end_work"), pmt::mp(0));
       // Tell runtime system how many output items we produced.
-      // printf("%s %d\n", "Work finishing. Output samples: ", output_number);
+      //printf("%s %d\n", "Work finishing. Output samples: ", output_number);
       return output_number;
     }
 
