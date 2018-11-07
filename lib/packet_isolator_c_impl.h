@@ -34,10 +34,12 @@ namespace gr {
        int d_lookup_window;
        int d_pack_length;
        int d_transmit_preamble;
+       int d_transmit_from_last_call;
+       int to_transmit;
        char* d_tag_name;
 
        uint64_t read;
-       uint64_t history_read;
+       long long history_read;
        uint64_t max_offset;
 
        uint64_t max_tag_offset;
