@@ -23,5 +23,6 @@
 ########################################################################
 install(FILES
     api.h
-    packet_isolator_c.h DESTINATION include/learning
+    packet_isolator_c.h
+    correlator.h DESTINATION include/learning
 )
