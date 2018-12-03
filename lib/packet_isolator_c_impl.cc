@@ -100,7 +100,7 @@ namespace gr {
           output_number += d_transmit_from_last_call;
         }
         else{
-          printf("%s\n", "Something went wrong: there is not enough output space to finish transferring packet");
+          // printf("%s\n", "Something went wrong: there is not enough output space to finish transferring packet");
         }
 
 
@@ -126,7 +126,7 @@ namespace gr {
           }
 
           if(d_relevant_tag.offset <= last_transmitted_offset + d_lookup_window){
-            printf("%s %lu %lu\n", "We wanted to transmit twice this offset:", last_transmitted_offset + d_lookup_window, d_relevant_tag.offset);
+            // printf("%s %lu %lu\n", "We wanted to transmit twice this offset:", last_transmitted_offset + d_lookup_window, d_relevant_tag.offset);
             continue;
           }
 
@@ -152,7 +152,7 @@ namespace gr {
             to_transmit = d_pack_length;
           }
           if (position+to_transmit>=ninput_items[0]) {
-            printf("%s %d\n", "Something went wrong! ", position+to_transmit - ninput_items[0]);
+            // printf("%s %d\n", "Something went wrong! ", position+to_transmit - ninput_items[0]);
           }
           //Forward a slice of inputs
           memcpy(out + d_transmit_from_last_call + tags_considered*d_pack_length, in + position+(d_preamble_length*(!d_transmit_preamble)), to_transmit * sizeof(gr_complex));
@@ -169,7 +169,7 @@ namespace gr {
 
           output_number += to_transmit;
           if (output_number > noutput_items){ //We don't want to write more than the size of the output array
-            printf("%s\n", "This is relevant!");
+            // printf("%s\n", "This is relevant!");
             consume_each(position); //We consume every item up to the relevant tag offset
             return output_number - to_transmit;
           }

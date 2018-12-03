@@ -59,7 +59,7 @@ class udp_trigger(gr.sync_block):
 
 
     def __exit__(self, exc_type, exc_value, traceback):
-        print("Exit")
+        # print("Exit")
         self.s.close()
 
     def handle_packet(self):
@@ -71,7 +71,7 @@ class udp_trigger(gr.sync_block):
         while 1:
             data = self.s.recv(1024)
             number = struct.unpack('B',data)[0]
-            print(number)
+            # print(number)
             if number != self.tx_number:
                 print("Wrong target")
                 continue

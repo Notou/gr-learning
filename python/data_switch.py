@@ -65,13 +65,13 @@ class data_switch(gr.basic_block):
 
     def general_work(self, input_items, output_items):
         """example: multiply with constant"""
-        print("Work",len(input_items[0]), len(input_items[1]) )
+        # print("Work",len(input_items[0]), len(input_items[1]) )
         tags0 = self.get_tags_in_window(0,  0 , self.header_byte_length, pmt.intern("header_start"))
         tags1 = self.get_tags_in_window(1,  0 , self.block_size, pmt.intern("header_start"))
         if len(input_items[0]) < self.header_byte_length:
             #print("Not enough input")
             if time.clock() - self.last_called > self.max_wait_time:
-                print("Wait too long, consuming")
+                # print("Wait too long, consuming")
                 self.consume(1, self.block_size)
                 self.last_called = float("inf")
             if self.last_called == float("inf"):
@@ -80,22 +80,22 @@ class data_switch(gr.basic_block):
             return 0
         self.last_called = float("inf")
         if len(tags0)==0:
-            print("No decoded tags")
+            # print("No decoded tags")
             self.consume(0,self.header_byte_length)
             #self.consume(1, self.block_size)
             return 0
         if len(tags1)==0:
-            print("No data tags")
+            # print("No data tags")
             self.consume(1, self.block_size)
             return 0
 
         print(pmt.to_python(tags0[0].value), pmt.to_python(tags1[0].value))
         if pmt.to_python(tags0[0].value) < pmt.to_python(tags1[0].value):
-            print("Decoded late")
+            # print("Decoded late")
             self.consume(0,self.header_byte_length)
             return 0
         if pmt.to_python(tags0[0].value) > pmt.to_python(tags1[0].value):
-            print("Decoded early")
+            # print("Decoded early")
             self.consume(1, self.block_size* (pmt.to_python(tags0[0].value)-pmt.to_python(tags1[0].value)))
             return 0
 
