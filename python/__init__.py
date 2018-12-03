@@ -39,5 +39,6 @@ from packet_isolator import packet_isolator
 from packet_header import packet_header
 from header_reader import header_reader
 from udp_trigger import udp_trigger
+from data_switch import data_switch
 
 #

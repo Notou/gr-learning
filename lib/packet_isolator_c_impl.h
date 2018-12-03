@@ -38,6 +38,7 @@ namespace gr {
        int to_transmit;
        char* d_tag_name;
 
+       long d_packet_number;
        uint64_t read;
        long long history_read;
        uint64_t max_offset;

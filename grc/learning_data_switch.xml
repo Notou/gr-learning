@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<block>
+  <name>Header based switch</name>
+  <key>learning_data_switch</key>
+  <category>[learning]</category>
+  <import>import learning</import>
+  <make>learning.data_switch($tx_amount, $header_size, $payload_size)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>Tx amount</name>
+    <key>tx_amount</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Header size</name>
+    <key>header_size</key>
+    <value>380</value>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>Payload size</name>
+    <key>payload_size</key>
+    <value>600</value>
+    <type>int</type>
+  </param>
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <sink>
+    <name>id</name>
+    <type>byte</type>
+  </sink>
+  <sink>
+    <name>frame</name>
+    <type>complex</type>
+  </sink>
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>complex</type>
+    <nports>$tx_amount</nports>
+  </source>
+</block>

@@ -28,5 +28,6 @@ install(FILES
     learning_packet_isolator_c.xml
     learning_correlator.xml
     learning_udp_trigger.xml
-    learning_head.xml DESTINATION share/gnuradio/grc/blocks
+    learning_head.xml
+    learning_data_switch.xml DESTINATION share/gnuradio/grc/blocks
 )

@@ -45,6 +45,7 @@ namespace gr {
     gr::io_signature::make(1, 1, sizeof(gr_complex)))
     {
       d_transmit_preamble = 0;
+      d_packet_number = 0;
       last_transmitted_offset = 0;
       d_payload_length = payload_length;
       d_preamble_length = preamble_length;
@@ -140,7 +141,6 @@ namespace gr {
 
           //Write a tag at the beginning of the payload
           tag_offset = written + d_transmit_from_last_call + tags_considered*d_pack_length + (d_preamble_length*d_transmit_preamble);
-          add_item_tag(0, tag_offset, pmt::intern("header_start"), pmt::mp(d_relevant_tag.offset));
 
 
           if(position + d_preamble_length+d_payload_length > ninput_items[0]){ //Do we have enough room to read all the packet samples?
@@ -173,6 +173,7 @@ namespace gr {
             consume_each(position); //We consume every item up to the relevant tag offset
             return output_number - to_transmit;
           }
+          add_item_tag(0, tag_offset+150, pmt::intern("header_start"), pmt::mp(d_packet_number++));
 
           tags_considered ++;
           last_transmitted_offset = d_relevant_tag.offset;
