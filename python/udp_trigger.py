@@ -75,7 +75,8 @@ class udp_trigger(gr.sync_block):
             if number != self.tx_number:
                 print("Wrong target")
                 continue
-            self.message_port_pub(pmt.intern('out'),self.message_buffer)
+            if self.message_buffer != None:
+                self.message_port_pub(pmt.intern('out'),self.message_buffer)
 
 
     def work(self, input_items, output_items):
