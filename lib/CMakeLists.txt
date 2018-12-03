@@ -29,6 +29,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND learning_sources
     packet_isolator_c_impl.cc
     correlator_impl.cc
+    head_impl.cc
 )
 
 set(learning_sources "${learning_sources}" PARENT_SCOPE)
