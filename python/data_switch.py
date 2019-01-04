@@ -118,7 +118,7 @@ class data_switch(gr.basic_block):
             self.add_item_tag(int(tx_id), self.nitems_written(int(tx_id)), pmt.intern("header_start"), pmt.to_pmt(0))
 
             if self.to_network:
-                PACKETDATA = self.format.pack(tx_id, input_items[1][self.header_size:self.block_size].real, input_items[1][self.header_size:self.block_size].imag)
+                PACKETDATA = self.format.pack(tx_id, *(input_items[1][self.header_size:self.block_size].real), *(input_items[1][self.header_size:self.block_size].imag))
                 self.s.sendto(PACKETDATA, (self.addr, self.port))
         else:
             print("Txid too big")
