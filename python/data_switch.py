@@ -23,7 +23,6 @@ import numpy as np
 import pmt
 import time
 import socket
-import struct
 from gnuradio import gr
 
 class data_switch(gr.basic_block):
@@ -60,7 +59,6 @@ class data_switch(gr.basic_block):
             self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
             self.addr = address
             self.port = port
-            self.format = struct.Struct('i600h600h')
 
     def forecast(self, noutput_items, ninput_items_required):
         # setup size of input_items[i] for work call
@@ -118,7 +116,7 @@ class data_switch(gr.basic_block):
             self.add_item_tag(int(tx_id), self.nitems_written(int(tx_id)), pmt.intern("header_start"), pmt.to_pmt(0))
 
             if self.to_network:
-                PACKETDATA = self.format.pack(tx_id, *(input_items[1][self.header_size:self.block_size].real), *(input_items[1][self.header_size:self.block_size].imag))
+                PACKETDATA = bytes([tx_id]) + (input_items[1][self.header_size:self.block_size].real).tostring() + (input_items[1][self.header_size:self.block_size].imag).tostring()
                 self.s.sendto(PACKETDATA, (self.addr, self.port))
         else:
             print("Txid too big")
