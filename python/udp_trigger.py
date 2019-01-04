@@ -47,14 +47,34 @@ class udp_trigger(gr.sync_block):
         self.message_port_register_in(pmt.intern("in"))
         self.set_msg_handler(pmt.intern("in"), self.handle_msg)
         self.message_buffer = None
-
+        self.once = False
+        print("Init")
         self.socket_thread = threading.Thread(target=self.handle_packet)
         self.socket_thread.daemon = True
         self.socket_thread.start()
 
 
     def handle_msg(self, msg):
+        if self.once:
+            return
+        self.once = True
         self.message_buffer = msg
+        print(msg)
+        print("Thread")
+        # initialize a socket, think of it as a cable
+        # SOCK_DGRAM specifies that this is UDP
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+        self.s.bind((self.ip_addr,self.port))
+        print("Listening")
+        while 1:
+            data = self.s.recv(1024)
+            number = struct.unpack('B',data)[0]
+            if number != self.tx_number:
+                print("Wrong target")
+                continue
+            if self.message_buffer is not None:
+                print("sending",number)                
+                self.message_port_pub(pmt.intern("out"),self.message_buffer)
 
 
 
@@ -63,20 +83,7 @@ class udp_trigger(gr.sync_block):
         self.s.close()
 
     def handle_packet(self):
-
-        # initialize a socket, think of it as a cable
-        # SOCK_DGRAM specifies that this is UDP
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-        self.s.bind((self.ip_addr,self.port))
-        while 1:
-            data = self.s.recv(1024)
-            number = struct.unpack('B',data)[0]
-            # print(number)
-            if number != self.tx_number:
-                print("Wrong target")
-                continue
-            if self.message_buffer != None:
-                self.message_port_pub(pmt.intern('out'),self.message_buffer)
+        pass
 
 
     def work(self, input_items, output_items):

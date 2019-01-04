@@ -57,7 +57,7 @@ class data_switch(gr.basic_block):
         ninput_items_required[1] = self.block_size
 
     def vote(self, data):
-        values = np.zeros(len(data))
+        values = np.zeros(self.tx_amount)
         for i in range(len(data)):
             values[data[i]] += 1
         return np.argmax(values)
