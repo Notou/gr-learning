@@ -59,9 +59,9 @@ namespace gr {
          gr_vector_void_star &output_items)
     {
       if(d_ncopied_items >= d_nitems){
-        if (!d_blocking) {
-          return -1; // Done!
-        }
+        // if (!d_blocking) {
+        //   return -1; // Done!
+        // }
         consume_each(noutput_items);
         return 0;
       }
