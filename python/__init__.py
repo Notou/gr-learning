@@ -24,11 +24,11 @@ description here (python/__init__.py).
 '''
 
 # import swig generated symbols into the learning namespace
-try:
+# try:
 	# this might fail if the module is python-only
 from .learning_swig import *
-except ImportError:
-	pass
+# except ImportError:
+# 	pass
 
 # import any pure python here
 from .sync_rl_preprocessor import sync_rl_preprocessor
@@ -43,4 +43,6 @@ from .data_switch import data_switch
 from .dl_demod import dl_demod
 
 from .sweeper import sweeper
+from .rl_mod import rl_mod
+
 #
