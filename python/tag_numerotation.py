@@ -29,7 +29,7 @@ class tag_numerotation(gr.sync_block):
     The value of the tag increases by one each time a tag is added.
     """
 
-    def __init__(self, tag_name, interval, io_type = None):
+    def __init__(self, tag_name, interval, modulo = 4096, io_type = None):
         print(io_type)
         sig_type = None
         if io_type == "cc":
@@ -46,7 +46,8 @@ class tag_numerotation(gr.sync_block):
             out_sig=[sig_type])
         self.tag_name = tag_name
         self.interval = interval
-        self.index = numpy.uint32(0)
+        self.modulo = modulo
+        self.index = numpy.uint64(0)
         self.offset = 0
         self.id = pmt.intern('tag_numerator')
 
@@ -54,11 +55,11 @@ class tag_numerotation(gr.sync_block):
     def work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        
+
         out[:] = in0
         input_size = len(input_items[0])
         for i in range(self.offset, input_size, self.interval):
-            self.add_item_tag( 0, self.interval * self.index, pmt.intern(self.tag_name), pmt.to_pmt(numpy.int64(self.index)), self.id)
-            self.index +=1
+            self.add_item_tag( 0, self.interval * self.index, pmt.intern(self.tag_name), pmt.to_pmt(int(self.index % self.modulo)), self.id)
+            self.index = (self.index + 1)
         self.offset = (input_size - self.offset) % self.interval
         return len(output_items[0])
