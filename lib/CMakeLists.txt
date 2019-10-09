@@ -30,6 +30,7 @@ list(APPEND learning_sources
     packet_isolator_c_impl.cc
     correlator_impl.cc
     head_impl.cc
+    ber_bf_impl.cc
 )
 
 set(learning_sources "${learning_sources}" PARENT_SCOPE)

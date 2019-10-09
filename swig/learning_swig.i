@@ -11,6 +11,7 @@
 #include "learning/packet_isolator_c.h"
 #include "learning/correlator.h"
 #include "learning/head.h"
+#include "learning/ber_bf.h"
 %}
 
 
@@ -20,3 +21,5 @@ GR_SWIG_BLOCK_MAGIC2(learning, packet_isolator_c);
 GR_SWIG_BLOCK_MAGIC2(learning, correlator);
 %include "learning/head.h"
 GR_SWIG_BLOCK_MAGIC2(learning, head);
+%include "learning/ber_bf.h"
+GR_SWIG_BLOCK_MAGIC2(learning, ber_bf);
