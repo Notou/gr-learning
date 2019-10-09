@@ -40,5 +40,6 @@ from .packet_header import packet_header
 from .header_reader import header_reader
 from .udp_trigger import udp_trigger
 from .data_switch import data_switch
+from .dl_demod import dl_demod
 
 #

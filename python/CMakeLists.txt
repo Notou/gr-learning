@@ -40,7 +40,9 @@ GR_PYTHON_INSTALL(
     packet_header.py
     header_reader.py
     udp_trigger.py
-    data_switch.py DESTINATION ${GR_PYTHON_DIR}/learning
+    data_switch.py
+    dl_demod.py
+    DESTINATION ${GR_PYTHON_DIR}/learning
 )
 
 ########################################################################

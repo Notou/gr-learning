@@ -31,6 +31,7 @@ install(FILES
     learning_udp_trigger.block.yml
     learning_head.block.yml
     learning_data_switch.block.yml
+    learning_dl_demod.block.yml
     learning_ber_bf.block.yml
     DESTINATION share/gnuradio/grc/blocks
 )
