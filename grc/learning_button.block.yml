@@ -1,0 +1,71 @@
+id: learning_button
+label: Button
+category: '[learning]'
+flags: [ show_id, python ]
+
+parameters:
+-   id: label
+    label: Label
+    dtype: string
+    hide: ${ ('none' if label else 'part') }
+-   id: type
+    label: Type
+    dtype: enum
+    default: int
+    options: [real, int, string, bool, raw]
+    option_labels: [Float, Integer, String, Boolean, Any]
+    option_attributes:
+        conv: [float, int, str, bool, eval]
+    hide: part
+-   id: value
+    label: Default Value
+    dtype: ${ type }
+    default: '0'
+-   id: block_id
+    label: Block ID
+    dtype: id
+    default: my_block_0
+-   id: function_name
+    label: Function Name
+    dtype: name
+    default: get_number
+-   id: function_args
+    label: Function Args
+    dtype: raw
+    hide: ${ ('none' if function_args else 'part') }
+-   id: gui_hint
+    label: GUI Hint
+    dtype: gui_hint
+    hide: part
+value: ${value}
+
+templates:
+    imports: from PyQt5 import Qt
+    var_make: "self.${id} = ${id} = ${value} \nself.${id}_args = ${id}_args = ${(function_args if function_args else None)}"
+    callbacks:
+    - self.set_${id}(${value})
+    - self.${id}_args = ${function_args}
+    make: |-
+        <%
+            win = '_{}_push_button'.format(id)
+        %>\
+        <% obj = 'self' + ('.' + block_id if block_id else '') %>
+        ${win} = Qt.QPushButton(${(label if (len(label) - 2 > 0) else repr(id))})
+        def ${id}_handler():
+          if self.${id}_args is not None:
+            self.set_${id}(${obj}.${function_name}(${function_args}))
+          else:
+            self.set_${id}(${obj}.${function_name}())
+        ${win}.clicked.connect( ${id}_handler )
+        ${gui_hint() % win}
+
+documentation: |-
+    This block creates a button. Leave the label blank to use the variable id as the label.
+
+    A button calls a selected function, in the selected block and. The variable will take the returned value.
+
+    Leave the arguments field empty or type None for a function without argument ( calling the function with one argument, that is None is thus not supported)
+
+    The GUI hint can be used to position the widget within the application. The hint is of the form [tab_id@tab_index]: [row, col, row_span, col_span]. Both the tab specification and the grid position are optional.
+
+file_format: 1

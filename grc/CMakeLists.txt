@@ -18,7 +18,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    learning_sync_rl_preprocessor.xml
+    learning_button.block.yml
     learning_sync_rl_preprocessor.block.yml
     learning_tag_numerotation.block.yml
     learning_error_estimator.block.yml
