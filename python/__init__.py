@@ -26,19 +26,19 @@ description here (python/__init__.py).
 # import swig generated symbols into the learning namespace
 try:
 	# this might fail if the module is python-only
-	from learning_swig import *
+from .learning_swig import *
 except ImportError:
 	pass
 
 # import any pure python here
-from sync_rl_preprocessor import sync_rl_preprocessor
-from tag_numerotation import tag_numerotation
-from error_estimator import error_estimator
-from iq_compensator import iq_compensator
-from packet_isolator import packet_isolator
-from packet_header import packet_header
-from header_reader import header_reader
-from udp_trigger import udp_trigger
-from data_switch import data_switch
+from .sync_rl_preprocessor import sync_rl_preprocessor
+from .tag_numerotation import tag_numerotation
+from .error_estimator import error_estimator
+from .iq_compensator import iq_compensator
+from .packet_isolator import packet_isolator
+from .packet_header import packet_header
+from .header_reader import header_reader
+from .udp_trigger import udp_trigger
+from .data_switch import data_switch
 
 #

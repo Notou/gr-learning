@@ -39,7 +39,11 @@ if(NOT learning_sources)
 endif(NOT learning_sources)
 
 add_library(gnuradio-learning SHARED ${learning_sources})
-target_link_libraries(gnuradio-learning ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES})
+target_link_libraries(gnuradio-learning gnuradio::gnuradio-runtime gnuradio::gnuradio-blocks gnuradio::gnuradio-fft gnuradio::gnuradio-filter)
+target_include_directories(gnuradio-learning
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    PUBLIC $<INSTALL_INTERFACE:include>
+  )
 set_target_properties(gnuradio-learning PROPERTIES DEFINE_SYMBOL "gnuradio_learning_EXPORTS")
 
 if(APPLE)
@@ -52,35 +56,32 @@ endif(APPLE)
 # Install built library files
 ########################################################################
 include(GrMiscUtils)
-GR_LIBRARY_FOO(gnuradio-learning RUNTIME_COMPONENT "learning_runtime" DEVEL_COMPONENT "learning_devel")
+GR_LIBRARY_FOO(gnuradio-learning)
 
 ########################################################################
 # Build and register unit test
 ########################################################################
-include(GrTest)
+#include(GrTest)
 
-include_directories(${CPPUNIT_INCLUDE_DIRS})
+#list(APPEND test_learning_sources
+#    ${CMAKE_CURRENT_SOURCE_DIR}/test_learning.cc
+#    ${CMAKE_CURRENT_SOURCE_DIR}/qa_learning.cc
+#)
 
-list(APPEND test_learning_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_learning.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/qa_learning.cc
-)
+#add_executable(test-learning ${test_learning_sources})
 
-add_executable(test-learning ${test_learning_sources})
+#target_link_libraries(
+#  test-learning
+#  ${GNURADIO_RUNTIME_LIBRARIES}
+#  ${Boost_LIBRARIES}
+#  ${CPPUNIT_LIBRARIES}
+#  gnuradio-learning
+#)
 
-target_link_libraries(
-  test-learning
-  ${GNURADIO_RUNTIME_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${CPPUNIT_LIBRARIES}
-  gnuradio-learning
-)
-
-GR_ADD_TEST(test_learning test-learning)
+#GR_ADD_TEST(test_learning test-learning)
 
 ########################################################################
 # Print summary
 ########################################################################
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Building for version: ${VERSION} / ${LIBVER}")
-

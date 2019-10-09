@@ -19,15 +19,17 @@
 # Boston, MA 02110-1301, USA.
 install(FILES
     learning_sync_rl_preprocessor.xml
-    learning_tag_numerotation.xml
-    learning_error_estimator.xml
-    learning_iq_compensator.xml
-    learning_packet_isolator.xml
-    learning_packet_header.xml
-    learning_header_reader.xml
-    learning_packet_isolator_c.xml
-    learning_correlator.xml
-    learning_udp_trigger.xml
-    learning_head.xml
-    learning_data_switch.xml DESTINATION share/gnuradio/grc/blocks
+    learning_sync_rl_preprocessor.block.yml
+    learning_tag_numerotation.block.yml
+    learning_error_estimator.block.yml
+    learning_iq_compensator.block.yml
+    learning_packet_isolator.block.yml
+    learning_packet_header.block.yml
+    learning_header_reader.block.yml
+    learning_packet_isolator_c.block.yml
+    learning_correlator.block.yml
+    learning_udp_trigger.block.yml
+    learning_head.block.yml
+    learning_data_switch.block.yml
+    DESTINATION share/gnuradio/grc/blocks
 )

@@ -27,7 +27,7 @@ The file instructs SWIG to transfer the doxygen comments into the
 python docstrings.
 
 """
-
+from __future__ import unicode_literals
 import sys, time
 
 from doxyxml import DoxyIndex, DoxyClass, DoxyFriend, DoxyFunction, DoxyFile
@@ -85,8 +85,10 @@ def utoascii(text):
     if text is None:
         return ''
     out = text.encode('ascii', 'replace')
-    out = out.replace('"', '\\"')
-    return out
+    # swig will require us to replace blackslash with 4 backslashes
+    out = out.replace(b'\\', b'\\\\\\\\')
+    out = out.replace(b'"', b'\\"').decode('ascii')
+    return str(out)
 
 
 def combine_descriptions(obj):
@@ -302,7 +304,7 @@ def make_swig_interface_file(di, swigdocfilename, custom_output=None):
 
     output = "\n\n".join(output)
 
-    swig_doc = file(swigdocfilename, 'w')
+    swig_doc = open(swigdocfilename, 'w')
     swig_doc.write(output)
     swig_doc.close()
 
@@ -310,7 +312,7 @@ if __name__ == "__main__":
     # Parse command line options and set up doxyxml.
     err_msg = "Execute using: python swig_doc.py xml_path outputfilename"
     if len(sys.argv) != 3:
-        raise StandardError(err_msg)
+        raise Exception(err_msg)
     xml_path = sys.argv[1]
     swigdocfilename = sys.argv[2]
     di = DoxyIndex(xml_path)

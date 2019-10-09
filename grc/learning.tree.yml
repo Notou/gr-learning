@@ -1,0 +1,14 @@
+'[GR-learning]':
+- learning_correlator
+- learning_data_switch
+- learning_error_estimator
+- learning_head
+- learning_header_reader
+- learning_iq_compensator
+- learning_packet_header
+- learning_packet_isolator
+- learning_packet_isolator_c
+- learning_sync_rl_preprocessor
+- learning_tag_numerotation
+- learning_udp_trigger
+- learning_button
