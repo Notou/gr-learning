@@ -42,6 +42,7 @@ GR_PYTHON_INSTALL(
     udp_trigger.py
     data_switch.py
     dl_demod.py
+    sweeper.py
     DESTINATION ${GR_PYTHON_DIR}/learning
 )
 
