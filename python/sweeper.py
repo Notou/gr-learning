@@ -80,12 +80,12 @@ class sweeper(gr.sync_block):
                 print("SNR to: {} and resetting ber".format(self.snrs[self.index]))
                 # Reset BER Block
                 getattr(self.top_block, self.ber_block).reset_counters()
-                print(self.results)
+                # print(self.results)
 
     def work(self, input_items, output_items):
         out = output_items[0]
         time.sleep(0.5)
         out[0] = self.results
-        output_items[1][0] = np.log10(0.5*special.erfc(np.sqrt(10**(self.snrs/10))))
+        output_items[1][0] = np.log10(0.0000001+special.erfc(np.sqrt(10**(self.snrs/10))))
 
         return len(output_items[0])

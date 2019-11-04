@@ -94,11 +94,11 @@ class alignement(gr.basic_block):  # other base classes are basic_block, decim_b
         if position0 + self.frame_size >= len(in0):
             #print("Stream 0 too late, consuming")
             self.consume(0, position0)
-            return position0
+            return 0
         if position1 + self.frame_size >= len(in1):
             #print("Stream 1 too late, consuming")
             self.consume(1, position1)
-            return position1
+            return 0
 
         #Detect packet packet loss
         if value0 != self.previous_packet+1:

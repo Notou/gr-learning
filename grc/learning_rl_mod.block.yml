@@ -4,7 +4,7 @@ category: '[learning]'
 
 templates:
   imports: import learning
-  make: learning.rl_mod(${tag_name}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${explo_noise}, ${state})
+  make: learning.rl_mod(${tag_name}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${explo_noise}, ${state})
   callbacks:
   - reset()
   - set_alternate(${training_mod})
@@ -26,6 +26,10 @@ parameters:
   label: Packet length
   dtype: int
   default: '256'
+- id: bitspmsg
+  label: Bits per message
+  dtype: int
+  default: '2'
 - id: batch_size
   label: Batch size
   dtype: int

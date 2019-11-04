@@ -4,7 +4,7 @@ category: '[learning]'
 
 templates:
   imports: import learning
-  make: learning.dl_demod(${tag_name}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${tstate})
+  make: learning.dl_demod(${tag_name}, ${bitwise}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${tstate})
   callbacks:
   - reset()
   - set_alternate(${training_mod})
@@ -21,10 +21,18 @@ parameters:
 - id: tag_name
   label: Tag name
   dtype: string
+- id: bitwise
+  label: Bitwise mutual information
+  dtype: bool
+  default: 'True'
 - id: packet_len
   label: Packet length
   dtype: int
   default: '256'
+- id: bitspmsg
+  label: Bits per message
+  dtype: int
+  default: '2'
 - id: batch_size
   label: Batch size
   dtype: int

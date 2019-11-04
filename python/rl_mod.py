@@ -31,7 +31,7 @@ class rl_mod(gr.basic_block):
     """
     Learnable RL-like modulator
     """
-    def __init__(self, tag_name="packet_num", packet_len=256, batch_size=1, mod = 1000, lr = 0.05, exp_noise = 0.01, on = True ):
+    def __init__(self, tag_name="packet_num", bpmsg = 2, packet_len=256, batch_size=1, mod = 1000, lr = 0.05, exp_noise = 0.01, on = True ):
         gr.basic_block.__init__(self,
             name="rl_mod",
             in_sig=[np.int8, ],
@@ -52,18 +52,18 @@ class rl_mod(gr.basic_block):
         self.message_port_register_in(pmt.intern('losses'))
         self.set_msg_handler(pmt.intern('losses'), self.message_callback)
 
-        self.bits_per_msg = 2
+        self.bits_per_msg = bpmsg
         self.real_chan_uses = 2
 
-        self.model = self.TX_Model(self.real_chan_uses)
+        # self.model = self.TX_Model(self.bits_per_msg, self.real_chan_uses)
+        self.embedding = tf.Variable(tf.random.uniform([2**self.bits_per_msg,self.real_chan_uses], minval=-2, maxval=2), trainable=True)
 
-        # self.loss_function = tf.nn.sigmoid_cross_entropy_with_logits
         self.optimizer = tf.optimizers.Adam(self.learning_rate)
 
-    def TX_Model(self, n):
+    def TX_Model(self, k, n):
       model = tf.keras.Sequential([
-            tf.keras.layers.Embedding(2**n,n)
-            # tf.keras.layers.Dense(n, activation=None, use_bias=False, input_shape=(n,))
+            tf.keras.layers.Embedding(2**k,n, embeddings_regularizer=tf.keras.regularizers.l2(l=1))
+            # tf.keras.layers.Embedding(2**n,n, embeddings_constraint=tf.keras.constraints.UnitNorm([0,1]))
       ])
       return model
 
@@ -83,10 +83,14 @@ class rl_mod(gr.basic_block):
             else:
                 with stored[1][1] as tape:
                     final_loss = stored[1][0] * losses.get(rx_num)  # Stored grad * received crossentropy loss
-
-                grad = tape.gradient(final_loss, self.model.trainable_variables)
-                self.optimizer.apply_gradients(zip(grad, self.model.trainable_variables))
+                    mean_loss = tf.reduce_mean(final_loss, axis=0)
+                # print(final_loss)
+                grad = tape.gradient(mean_loss, self.embedding)
+                self.optimizer.apply_gradients(zip([grad], [self.embedding,]))
+                # grad = tape.gradient(final_loss, self.model.trainable_variables)
+                # self.optimizer.apply_gradients(zip(grad, self.model.trainable_variables,))
                 del tape
+                # self.embedding.assign(self.embedding/tf.sqrt(tf.reduce_mean(2*tf.square(self.embedding))))
                 break
 
     def reset(self):
@@ -119,7 +123,8 @@ class rl_mod(gr.basic_block):
         tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
 
         if self.resetting:
-            self.model = self.TX_Model(self.real_chan_uses)
+            self.embedding = tf.Variable(tf.random.uniform([2**self.bits_per_msg,self.real_chan_uses], minval=-1, maxval=1), trainable=True)
+            # self.model = self.TX_Model(self.real_chan_uses)
             self.optimizer = tf.optimizers.Adam(self.learning_rate)
             self.grad_buffer = []
             self.resetting = False
@@ -136,13 +141,13 @@ class rl_mod(gr.basic_block):
                 learner = 'RX'
 
         # bits = np.float32(np.unpackbits(np.reshape(np.uint8(input_items[0][:self.packet_len*self.batch_size]), (-1,1)), axis=1, count=2, bitorder='little'))
-        messages = np.uint8(input_items[0][:self.packet_len*self.batch_size])
+        messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
         with tf.GradientTape(persistent=True) as tape:
-            clean = self.model(messages)
-            if (pmt.to_python(tags0[0].value) % 100) ==0:
-                print(clean[1])
+            norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
+            clean = tf.nn.embedding_lookup(norm, messages)
+            # clean = self.model(messages)
+            # clean = clean/tf.sqrt(2*tf.reduce_mean(tf.square(clean)))
             if learner == 'TX' and self.training:
-                clean = clean/tf.sqrt(2*tf.reduce_mean(tf.square(clean)))
                 noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
                 loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
         if learner == 'TX' and self.training:
@@ -152,7 +157,7 @@ class rl_mod(gr.basic_block):
             symbols = clean
 
         # Normalise power of output vector
-        out = symbols/tf.sqrt(2*tf.reduce_mean(tf.square(symbols)))
+        out = symbols#/tf.sqrt(2*tf.reduce_mean(tf.square(symbols)))
         output_items[0][:self.packet_len*self.batch_size] = out.numpy().view(dtype=np.complex64)[:,0]
 
         self.consume(0, self.packet_len*self.batch_size)        #self.consume_each(len(input_items[0]))

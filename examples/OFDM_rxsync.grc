@@ -1536,6 +1536,8 @@ blocks:
     affinity: ''
     alias: ''
     batch_size: '16'
+    bitspmsg: '2'
+    bitwise: 'True'
     comment: ''
     lr: '0.05'
     maxoutbuf: '0'
@@ -1543,6 +1545,7 @@ blocks:
     packet_len: packet_len*4
     tag_name: packet_num
     training_mod: training_mod
+    tstate: '1'
   states:
     bus_sink: false
     bus_source: false
