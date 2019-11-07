@@ -1667,7 +1667,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    batch_size: '1'
+    batch_size: '20'
     bitspmsg: bits_per_symbol
     bitwise: 'False'
     comment: ''
@@ -1690,7 +1690,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    batch_size: '1'
+    batch_size: '10'
     bitspmsg: bits_per_symbol
     comment: ''
     explo_noise: tx_explo
@@ -1698,7 +1698,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     packet_len: packet_len
-    state: t_state
+    state: 't_state '
     tag_name: packet_num
     training_mod: training_mod
   states:
@@ -2011,7 +2011,7 @@ blocks:
     bus_structure: null
     coordinate: [291, 1044]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_number_sink_1
   id: qtgui_number_sink
   parameters:
@@ -2212,7 +2212,7 @@ blocks:
     tr_mode: qtgui.TRIG_MODE_FREE
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '""'
-    type: float
+    type: complex
     update_time: '0.10'
     width1: '1'
     width10: '1'
@@ -2647,7 +2647,7 @@ blocks:
     gain7: '0'
     gain8: '0'
     gain9: '0'
-    len_tag_name: ''
+    len_tag_name: packet_len
     lo_export0: 'False'
     lo_export1: 'False'
     lo_export10: 'False'
@@ -3419,6 +3419,8 @@ connections:
 - [learning_tag_numerotation_0, '0', virtual_sink_0_0_0, '0']
 - [uhd_usrp_source_0, '0', blocks_delay_0, '0']
 - [uhd_usrp_source_0, '0', digital_ofdm_sync_sc_cfb_0, '0']
+- [uhd_usrp_source_0, '0', qtgui_freq_sink_x_0, '0']
+- [uhd_usrp_source_0, '0', qtgui_time_sink_x_0, '0']
 - [virtual_source_0, '0', fft_vxx_0, '0']
 - [virtual_source_0_0, '0', blocks_add_xx_0, '0']
 - [virtual_source_0_0, '0', blocks_complex_to_mag_squared_1, '0']
