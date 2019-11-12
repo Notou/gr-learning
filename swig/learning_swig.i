@@ -12,6 +12,7 @@
 #include "learning/correlator.h"
 #include "learning/head.h"
 #include "learning/ber_bf.h"
+#include "learning/align.h"
 %}
 
 
@@ -23,3 +24,5 @@ GR_SWIG_BLOCK_MAGIC2(learning, correlator);
 GR_SWIG_BLOCK_MAGIC2(learning, head);
 %include "learning/ber_bf.h"
 GR_SWIG_BLOCK_MAGIC2(learning, ber_bf);
+%include "learning/align.h"
+GR_SWIG_BLOCK_MAGIC2(learning, align);
