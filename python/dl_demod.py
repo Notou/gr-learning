@@ -48,8 +48,9 @@ class dl_demod(gr.basic_block):
 
         self.bits_per_msg = bpmsg
         self.real_chan_uses = 2
+        self.starting = True
 
-        self.bitwise = bitwise
+        self.bitwise = tf.constant(bitwise)
 
         #model parameters
         self.learning_rate = lr
@@ -103,6 +104,32 @@ class dl_demod(gr.basic_block):
         for i in range(len(ninput_items_required)):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
+
+    @tf.function
+    def train(self, input, label):
+        with tf.GradientTape(persistent=False) as tape:
+            estimation = self.model(input)
+            loss = self.loss_function(label, estimation)
+            if self.bitwise:
+                overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
+            else:
+                overall_loss = loss  # Symbol wise
+            mean_loss = tf.reduce_mean(overall_loss, axis=0)
+
+        rx_grad = tape.gradient(mean_loss, self.model.trainable_variables) # tape is lost after this line when persitence is off
+        self.optimizer.apply_gradients(zip(rx_grad, self.model.trainable_variables))
+        return estimation
+
+    @tf.function
+    def inference(self, input, label):
+        estimation = self.model(input)
+        loss = self.loss_function(label, estimation)
+        if self.bitwise:
+            overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
+        else:
+            overall_loss = loss  # Symbol wise
+        return estimation, overall_loss
+
     def general_work(self, input_items, output_items):
         input = input_items[0]
         labels = input_items[1]
@@ -154,28 +181,20 @@ class dl_demod(gr.basic_block):
             start = self.packet_len*packets_seen
             stop = self.packet_len*(packets_seen+ chunk[1])
             if chunk[0]: # It is not ours to learn on these packets
-                estimation = self.model(input_real[start:stop])
-                loss = self.loss_function(label[start:stop], estimation)
-                if self.bitwise:
-                    overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
-                else:
-                    overall_loss = loss  # Symbol wise
+                # begin = time.time()
+                estimation, overall_loss = self.inference(input_real[start:stop], label[start:stop])
+                # end  = time.time()
+                # print("RX inference {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
+
                 if self.training:
                     for i in range(chunk[1]): # We send seperate messages for the losses of each packet  (because we cannot garantee continuity)
                         tuple = pmt.to_pmt((numbers[packets_seen: chunk[1]+packets_seen], overall_loss.numpy()))
                         self.message_port_pub(pmt.intern("losses"), tuple)
             else:       # Let's learn!
-                with tf.GradientTape(persistent=False) as tape:
-                    estimation = self.model(input_real[start:stop])
-                    loss = self.loss_function(label[start:stop], estimation)
-                    if self.bitwise:
-                        overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
-                    else:
-                        overall_loss = loss  # Symbol wise
-                    mean_loss = tf.reduce_mean(overall_loss, axis=0)
-
-                rx_grad = tape.gradient(mean_loss, self.model.trainable_variables) # tape is lost after this line when persitence is off
-                self.optimizer.apply_gradients(zip(rx_grad, self.model.trainable_variables))
+                # begin = time.time()
+                estimation = self.train(input_real[start:stop], label[start:stop])
+                # end  = time.time()
+                # print("RX estimation {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
 
             if self.bitwise:
                 output_bits = np.reshape(np.packbits(np.uint8((tf.sign(estimation)+1)/2), axis=-1, bitorder='little'),(-1,)) # Bitwise
@@ -187,7 +206,6 @@ class dl_demod(gr.basic_block):
 
         # output_items[0][:self.packet_len*self.batch_size] = output_bits
         output_items[1][:samples] = labels[:samples]
-
 
         self.consume(0, samples)
         self.consume(1, samples)
