@@ -27,6 +27,7 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow as tf
 import pmt
 import threading
+import time
 
 class rl_mod(gr.basic_block):
     """
@@ -97,10 +98,7 @@ class rl_mod(gr.basic_block):
                     # print(final_loss)
                     grad = tape.gradient(mean_loss, self.embedding)
                     self.optimizer.apply_gradients(zip([grad], [self.embedding,]))
-                    # grad = tape.gradient(final_loss, self.model.trainable_variables)
-                    # self.optimizer.apply_gradients(zip(grad, self.model.trainable_variables,))
                     del tape
-                    # self.embedding.assign(self.embedding/tf.sqrt(tf.reduce_mean(2*tf.square(self.embedding))))
                     break
 
     def reset(self):
@@ -130,6 +128,21 @@ class rl_mod(gr.basic_block):
         for i in range(len(ninput_items_required)):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
+    @tf.function
+    def inference(self, input):
+        norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
+        clean = tf.nn.embedding_lookup(norm, input)
+        return clean
+
+    @tf.function
+    def inference_and_explo(self, input):
+        norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
+        clean = tf.nn.embedding_lookup(norm, input)
+
+        noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
+        loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
+        return loss, noisy
+
     def general_work(self, input_items, output_items):
 
         tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
@@ -158,21 +171,13 @@ class rl_mod(gr.basic_block):
             messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
             for i in range(self.batch_size):
                 with tf.GradientTape(persistent=True) as tape:
-                    norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
-                    clean = tf.nn.embedding_lookup(norm, messages[self.packet_len*i: self.packet_len*(i+1)])
-                    # clean = self.model(messages)
-                    # clean = clean/tf.sqrt(2*tf.reduce_mean(tf.square(clean)))
-                    noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
-                    loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
-                self.grad_buffer.append((pmt.to_python(tags0[0].value), (loss, tape)))
-                output_items[0][self.packet_len*i: self.packet_len*(i+1)] = noisy.numpy().view(dtype=np.complex64)[:,0]
+                    loss, noisy = self.inference_and_explo(messages[self.packet_len*i: self.packet_len*(i+1)])
+                    self.grad_buffer.append((pmt.to_python(tags0[0].value), (loss, tape)))
+                    output_items[0][self.packet_len*i: self.packet_len*(i+1)] = noisy.numpy().view(dtype=np.complex64)[:,0]
             output_samples = self.packet_len * self.batch_size
         else:
             messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
-            norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
-            clean = tf.nn.embedding_lookup(norm, messages)
-
-            out = clean
+            out = self.inference(messages)
             output_items[0][:self.packet_len*self.batch_size] = out.numpy().view(dtype=np.complex64)[:,0]
             # while len(self.msg_list) > 0:
             #     self.handle_callback_data(self.msg_list.pop(0))

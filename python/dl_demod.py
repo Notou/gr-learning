@@ -50,7 +50,7 @@ class dl_demod(gr.basic_block):
         self.real_chan_uses = 2
         self.starting = True
 
-        self.bitwise = tf.constant(bitwise)
+        self.bitwise = bitwise
 
         #model parameters
         self.learning_rate = lr
@@ -106,11 +106,11 @@ class dl_demod(gr.basic_block):
 
 
     @tf.function
-    def train(self, input, label):
+    def train(self, input, label, bitwise):
         with tf.GradientTape(persistent=False) as tape:
             estimation = self.model(input)
             loss = self.loss_function(label, estimation)
-            if self.bitwise:
+            if bitwise:
                 overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
             else:
                 overall_loss = loss  # Symbol wise
@@ -121,10 +121,10 @@ class dl_demod(gr.basic_block):
         return estimation
 
     @tf.function
-    def inference(self, input, label):
+    def inference(self, input, label, bitwise):
         estimation = self.model(input)
         loss = self.loss_function(label, estimation)
-        if self.bitwise:
+        if bitwise:
             overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
         else:
             overall_loss = loss  # Symbol wise
@@ -167,6 +167,7 @@ class dl_demod(gr.basic_block):
 
         #Preprocess data and labels
         input_real = np.stack((input[:samples].real, input[:samples].imag), axis=-1)
+        print(input_real.shape)
         if self.bitwise: # Testé
             label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:samples]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little'))
             # label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:self.packet_len*self.batch_size]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little')) # Bitwise
@@ -182,7 +183,7 @@ class dl_demod(gr.basic_block):
             stop = self.packet_len*(packets_seen+ chunk[1])
             if chunk[0]: # It is not ours to learn on these packets
                 # begin = time.time()
-                estimation, overall_loss = self.inference(input_real[start:stop], label[start:stop])
+                estimation, overall_loss = self.inference(input_real[start:stop], label[start:stop], self.bitwise)
                 # end  = time.time()
                 # print("RX inference {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
 
@@ -192,7 +193,7 @@ class dl_demod(gr.basic_block):
                         self.message_port_pub(pmt.intern("losses"), tuple)
             else:       # Let's learn!
                 # begin = time.time()
-                estimation = self.train(input_real[start:stop], label[start:stop])
+                estimation = self.train(input_real[start:stop], label[start:stop], self.bitwise)
                 # end  = time.time()
                 # print("RX estimation {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
 
