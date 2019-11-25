@@ -26,6 +26,6 @@ install(FILES
     packet_isolator_c.h
     correlator.h
     head.h
-    ber_bf.h 
-    DESTINATION include/learning
+    ber_bf.h
+    align.h DESTINATION include/learning
 )

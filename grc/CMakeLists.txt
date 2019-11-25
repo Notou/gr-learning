@@ -34,6 +34,6 @@ install(FILES
     learning_dl_demod.block.yml
     learning_ber_bf.block.yml
     learning_sweeper.block.yml
-    learning_rl_mod.block.yml 
-    DESTINATION share/gnuradio/grc/blocks
+    learning_rl_mod.block.yml
+    learning_align.block.yml DESTINATION share/gnuradio/grc/blocks
 )

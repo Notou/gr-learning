@@ -48,6 +48,7 @@ class dl_demod(gr.basic_block):
 
         self.bits_per_msg = bpmsg
         self.real_chan_uses = 2
+        self.starting = True
 
         self.bitwise = bitwise
 
@@ -103,9 +104,36 @@ class dl_demod(gr.basic_block):
         for i in range(len(ninput_items_required)):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
+
+    @tf.function
+    def train(self, input, label, bitwise):
+        with tf.GradientTape(persistent=False) as tape:
+            estimation = self.model(input)
+            loss = self.loss_function(label, estimation)
+            if bitwise:
+                overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
+            else:
+                overall_loss = loss  # Symbol wise
+            mean_loss = tf.reduce_mean(overall_loss, axis=0)
+
+        rx_grad = tape.gradient(mean_loss, self.model.trainable_variables) # tape is lost after this line when persitence is off
+        self.optimizer.apply_gradients(zip(rx_grad, self.model.trainable_variables))
+        return estimation
+
+    @tf.function
+    def inference(self, input, label, bitwise):
+        estimation = self.model(input)
+        loss = self.loss_function(label, estimation)
+        if bitwise:
+            overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
+        else:
+            overall_loss = loss  # Symbol wise
+        return estimation, overall_loss
+
     def general_work(self, input_items, output_items):
         input = input_items[0]
         labels = input_items[1]
+        samples = self.packet_len * (len(output_items[0])//self.packet_len)
 
         if self.resetting:
             self.model = self.RX_Model(self.real_chan_uses, self.bits_per_msg)
@@ -113,60 +141,73 @@ class dl_demod(gr.basic_block):
             self.resetting = False
 
         #Verify presence of tags? Not mandatory
-        tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
+        tags0 = self.get_tags_in_window(0,  0 , samples, pmt.intern(self.tag_name))
 
         if len(tags0) == 0 :
             print("RX : We are missing tags at input")
 
-        learner = 'TX'
-        if (self.train_modulo > 0):
-            if ((pmt.to_python(tags0[0].value) // self.train_modulo) %2) ==0:
-                learner = 'RX'
+        lengths = []
+        numbers = []
+        for tag in tags0:
+            num = pmt.to_python(tag.value)
+            numbers.append(num)
+            learner_tx = True
+            if ((num // self.train_modulo) %2) ==0 and self.training==True:
+                learner_tx = False
+            if len(lengths) > 0 and lengths[-1][0] == learner_tx:
+                lengths[-1][1] += 1
+            else:
+                lengths.append([learner_tx, 1])
+
+        # learner = 'TX'
+        # if (self.train_modulo > 0):
+        #     if ((pmt.to_python(tags0[0].value) // self.train_modulo) %2) ==0:
+        #         learner = 'RX'
 
 
         #Preprocess data and labels
-        input_real = np.stack((input[:self.packet_len*self.batch_size].real, input[:self.packet_len*self.batch_size].imag), axis=-1)
+        input_real = np.stack((input[:samples].real, input[:samples].imag), axis=-1)
+        print(input_real.shape)
         if self.bitwise: # Testé
-            label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:self.packet_len*self.batch_size]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little')) # Bitwise
+            label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:samples]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little'))
+            # label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:self.packet_len*self.batch_size]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little')) # Bitwise
         else:
-            label = np.reshape(np.uint8(labels[:self.packet_len*self.batch_size]), (-1,1))  # Symbol wise
-        with tf.GradientTape(persistent=True) as tape:
+            label = np.reshape(np.uint8(labels[:samples]), (-1,1))
+            # label = np.reshape(np.uint8(labels[:self.packet_len*self.batch_size]), (-1,1))  # Symbol wise
 
-            estimation = self.model(input_real)
-            loss = self.loss_function(label, estimation)
-            # print(loss)
+        # print("RX : Lengths list: {}".format(lengths))
+        packets_seen = 0
 
-            # print(self.loss_function(label, (label*200)-100))
+        for chunk in lengths:
+            start = self.packet_len*packets_seen
+            stop = self.packet_len*(packets_seen+ chunk[1])
+            if chunk[0]: # It is not ours to learn on these packets
+                # begin = time.time()
+                estimation, overall_loss = self.inference(input_real[start:stop], label[start:stop], self.bitwise)
+                # end  = time.time()
+                # print("RX inference {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
+
+                if self.training:
+                    for i in range(chunk[1]): # We send seperate messages for the losses of each packet  (because we cannot garantee continuity)
+                        tuple = pmt.to_pmt((numbers[packets_seen: chunk[1]+packets_seen], overall_loss.numpy()))
+                        self.message_port_pub(pmt.intern("losses"), tuple)
+            else:       # Let's learn!
+                # begin = time.time()
+                estimation = self.train(input_real[start:stop], label[start:stop], self.bitwise)
+                # end  = time.time()
+                # print("RX estimation {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
 
             if self.bitwise:
-                overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
+                output_bits = np.reshape(np.packbits(np.uint8((tf.sign(estimation)+1)/2), axis=-1, bitorder='little'),(-1,)) # Bitwise
             else:
-                overall_loss = loss  # Symbol wise
-            mean_loss = tf.reduce_mean(overall_loss, axis=0)
-            self.train_loss.update_state(overall_loss)
-            if self.printcount == self.printoften:
-                print("RX : Loss is {}".format(self.train_loss.result()))
-                self.train_loss.reset_states()
-                self.printcount=0
-            else:
-                self.printcount +=1
-        if learner == 'RX' and self.training:
-            rx_grad = tape.gradient(mean_loss, self.model.trainable_variables)
-            self.optimizer.apply_gradients(zip(rx_grad, self.model.trainable_variables))
-        else:
-            dict = pmt.dict_add(pmt.make_dict(), tags0[0].value, pmt.to_pmt(overall_loss.numpy()))
-            self.message_port_pub(pmt.intern("losses"), dict)
-        del tape
-
-        if self.bitwise:
-            output_bits = np.reshape(np.packbits(np.uint8((tf.sign(estimation)+1)/2), axis=-1, bitorder='little'),(-1,)) # Bitwise
-        else:
-            output_bits = tf.argmax(estimation, axis=1)   # Symbol wise
-
-        output_items[0][:self.packet_len*self.batch_size] = output_bits
-        output_items[1][:self.packet_len*self.batch_size] = labels[:self.packet_len*self.batch_size]
+                output_bits = tf.argmax(estimation, axis=1)   # Symbol wise
+            output_items[0][start : stop] = output_bits
+            packets_seen += chunk[1]
 
 
-        self.consume(0, self.packet_len*self.batch_size)
-        self.consume(1, self.packet_len*self.batch_size)
-        return self.packet_len*self.batch_size
+        # output_items[0][:self.packet_len*self.batch_size] = output_bits
+        output_items[1][:samples] = labels[:samples]
+
+        self.consume(0, samples)
+        self.consume(1, samples)
+        return samples

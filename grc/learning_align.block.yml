@@ -1,0 +1,28 @@
+id: learning_align
+label: Align
+category: '[learning]'
+templates:
+  imports: import learning
+  make: learning.align(${tag_name}, ${frame_size})
+parameters:
+- id: tag_name
+  label: Tag name
+  dtype: string
+- id: frame_size
+  label: Frame size
+  dtype: int
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+- label: in
+  domain: stream
+  dtype: byte
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+- label: out
+  domain: stream
+  dtype: byte
+file_format: 1

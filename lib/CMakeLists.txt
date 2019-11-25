@@ -31,6 +31,7 @@ list(APPEND learning_sources
     correlator_impl.cc
     head_impl.cc
     ber_bf_impl.cc
+    align_impl.cc
 )
 
 set(learning_sources "${learning_sources}" PARENT_SCOPE)

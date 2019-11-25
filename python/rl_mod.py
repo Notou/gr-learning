@@ -26,6 +26,8 @@ from gnuradio import gr
 warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow as tf
 import pmt
+import threading
+import time
 
 class rl_mod(gr.basic_block):
     """
@@ -39,13 +41,14 @@ class rl_mod(gr.basic_block):
 
         self.tag_name = tag_name
         self.packet_len = packet_len
-        self.batch_size = 1#batch_size
+        self.batch_size = mod#batch_size
         self.train_modulo = mod
         self.exploration_noise = exp_noise
         self.learning_rate = lr
         self.training = True if on==1 else False
 
         self.grad_buffer = []
+        self.msg_list = []
         self.resetting = False
 
         self.set_output_multiple(self.packet_len*self.batch_size)
@@ -70,28 +73,33 @@ class rl_mod(gr.basic_block):
     def message_callback(self, msg):
         if not self.training:
             return
-        losses = pmt.to_python(msg)
-        while len(self.grad_buffer)>0:
-            stored = self.grad_buffer.pop(0)
-            rx_num = list(losses.keys())[0]
-            if stored[0] < rx_num:
-                print('TX: We lost a loss: {} key is {}'.format(stored[0], rx_num))
-                continue
-            elif stored[0] > rx_num:
-                self.grad_buffer.insert(0, stored) #Lets put it back in the buffer
-                break
-            else:
-                with stored[1][1] as tape:
-                    final_loss = stored[1][0] * losses.get(rx_num)  # Stored grad * received crossentropy loss
-                    mean_loss = tf.reduce_mean(final_loss, axis=0)
-                # print(final_loss)
-                grad = tape.gradient(mean_loss, self.embedding)
-                self.optimizer.apply_gradients(zip([grad], [self.embedding,]))
-                # grad = tape.gradient(final_loss, self.model.trainable_variables)
-                # self.optimizer.apply_gradients(zip(grad, self.model.trainable_variables,))
-                del tape
-                # self.embedding.assign(self.embedding/tf.sqrt(tf.reduce_mean(2*tf.square(self.embedding))))
-                break
+        else :
+            # threading.Thread(target=self.handle_callback_data, args=(msg,)).start()
+            self.handle_callback_data(msg)
+            # print(len(self.msg_list))
+
+
+    def handle_callback_data(self, msg):
+        num_list, losses = pmt.to_python(msg)
+        for i in range(len(num_list)):
+            while len(self.grad_buffer)>0:
+                stored = self.grad_buffer.pop(0)
+                rx_num = num_list[i]
+                if stored[0] < rx_num:
+                    # print('TX: We lost a loss: {} key is {}'.format(stored[0], rx_num))
+                    continue
+                elif stored[0] > rx_num:
+                    self.grad_buffer.insert(0, stored) #Lets put it back in the buffer
+                    break
+                else:
+                    with stored[1][1] as tape:
+                        final_loss = stored[1][0] * losses[self.packet_len*i: self.packet_len*(i+1)]  # Stored grad * received crossentropy loss
+                        mean_loss = tf.reduce_mean(final_loss, axis=0)
+                    # print(final_loss)
+                    grad = tape.gradient(mean_loss, self.embedding)
+                    self.optimizer.apply_gradients(zip([grad], [self.embedding,]))
+                    del tape
+                    break
 
     def reset(self):
         print("TX: Resetting")
@@ -103,6 +111,7 @@ class rl_mod(gr.basic_block):
 
     def set_alternate(self, mod):
         self.train_modulo = mod
+        self.batch_size=mod
         print('TX: Changing training modulo to {}'.format(self.train_modulo))
 
     def set_lr(self, lr):
@@ -119,7 +128,23 @@ class rl_mod(gr.basic_block):
         for i in range(len(ninput_items_required)):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
+    @tf.function
+    def inference(self, input):
+        norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
+        clean = tf.nn.embedding_lookup(norm, input)
+        return clean
+
+    @tf.function
+    def inference_and_explo(self, input):
+        norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
+        clean = tf.nn.embedding_lookup(norm, input)
+
+        noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
+        loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
+        return loss, noisy
+
     def general_work(self, input_items, output_items):
+
         tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
 
         if self.resetting:
@@ -140,25 +165,25 @@ class rl_mod(gr.basic_block):
             if ((pmt.to_python(tags0[0].value) // self.train_modulo) %2) ==0:
                 learner = 'RX'
 
+        output_samples = 0
         # bits = np.float32(np.unpackbits(np.reshape(np.uint8(input_items[0][:self.packet_len*self.batch_size]), (-1,1)), axis=1, count=2, bitorder='little'))
-        messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
-        with tf.GradientTape(persistent=True) as tape:
-            norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
-            clean = tf.nn.embedding_lookup(norm, messages)
-            # clean = self.model(messages)
-            # clean = clean/tf.sqrt(2*tf.reduce_mean(tf.square(clean)))
-            if learner == 'TX' and self.training:
-                noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
-                loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
         if learner == 'TX' and self.training:
-            self.grad_buffer.append((pmt.to_python(tags0[0].value), (loss, tape)))
-            symbols = noisy
+            messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
+            for i in range(self.batch_size):
+                with tf.GradientTape(persistent=True) as tape:
+                    loss, noisy = self.inference_and_explo(messages[self.packet_len*i: self.packet_len*(i+1)])
+                    self.grad_buffer.append((pmt.to_python(tags0[0].value), (loss, tape)))
+                    output_items[0][self.packet_len*i: self.packet_len*(i+1)] = noisy.numpy().view(dtype=np.complex64)[:,0]
+            output_samples = self.packet_len * self.batch_size
         else:
-            symbols = clean
+            messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
+            out = self.inference(messages)
+            output_items[0][:self.packet_len*self.batch_size] = out.numpy().view(dtype=np.complex64)[:,0]
+            # while len(self.msg_list) > 0:
+            #     self.handle_callback_data(self.msg_list.pop(0))
+            output_samples = self.packet_len*self.batch_size
 
-        # Normalise power of output vector
-        out = symbols#/tf.sqrt(2*tf.reduce_mean(tf.square(symbols)))
-        output_items[0][:self.packet_len*self.batch_size] = out.numpy().view(dtype=np.complex64)[:,0]
 
-        self.consume(0, self.packet_len*self.batch_size)        #self.consume_each(len(input_items[0]))
-        return self.packet_len*self.batch_size
+
+        self.consume(0, output_samples)        #self.consume_each(len(input_items[0]))
+        return output_samples
