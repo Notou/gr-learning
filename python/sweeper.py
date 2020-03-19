@@ -53,7 +53,7 @@ class sweeper(gr.sync_block):
     def start_sweep(self):
         self.index = 0
         self.snr_variable(self.snrs[self.index])
-        self.results = np.zeros((len(self.snrs),))
+        # self.results = np.zeros((len(self.snrs),))
 
         # time.sleep(1)
         getattr(self.top_block, self.ber_block).reset_counters()
@@ -79,6 +79,7 @@ class sweeper(gr.sync_block):
                 self.snr_variable(self.snrs[self.index])
                 print("SNR to: {} and resetting ber".format(self.snrs[self.index]))
                 # Reset BER Block
+                time.sleep(1.5)
                 getattr(self.top_block, self.ber_block).reset_counters()
                 # print(self.results)
 
