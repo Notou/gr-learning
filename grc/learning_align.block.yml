@@ -3,7 +3,7 @@ label: Align
 category: '[learning]'
 templates:
   imports: import learning
-  make: learning.align(${tag_name}, ${frame_size})
+  make: learning.align(${tag_name}, ${frame_size}, ${vec_len}, ${user_symbols})
 parameters:
 - id: tag_name
   label: Tag name
@@ -11,10 +11,22 @@ parameters:
 - id: frame_size
   label: Frame size
   dtype: int
+- id: vec_len
+  label: Vector length
+  dtype: int
+  default: '64'
+- id: user_symbols
+  dtype: int
+  default: '48'
+  hide: ${ ('all' if vec_len <= 1 else 'none') }
+
+
+
 inputs:
 - label: in
   domain: stream
   dtype: complex
+  vlen: ${vec_len}
 - label: in
   domain: stream
   dtype: byte
@@ -22,7 +34,15 @@ outputs:
 - label: out
   domain: stream
   dtype: complex
+  vlen: ${vec_len}
 - label: out
   domain: stream
   dtype: byte
+
+
+
+asserts:
+- ${ vec_len > 0 }
+- ${ user_symbols > 0 }
+
 file_format: 1

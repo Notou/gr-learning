@@ -32,12 +32,14 @@ namespace gr {
       // Nothing to declare in this block.
       char* d_tag_name;
       int d_frame_size;
+      int d_user_symbols;
+      int d_vec_len;
 
       int d_previous_packet = -1;
       int d_last_packet_loss = -1;
 
      public:
-      align_impl(char* tag_name, int frame_size);
+      align_impl(char* tag_name, int frame_size, int vec_len, int user_symbols);
       ~align_impl();
 
       // Where all the action really happens

@@ -45,11 +45,10 @@ namespace gr {
        * class. learning::align::make is the public interface for
        * creating new instances.
        */
-      static sptr make(char* tag_name, int frame_size);
+      static sptr make(char* tag_name, int frame_size, int vec_len, int user_symbols);
     };
 
   } // namespace learning
 } // namespace gr
 
 #endif /* INCLUDED_LEARNING_ALIGN_H */
-
