@@ -28,16 +28,17 @@ import tensorflow as tf
 import pmt
 import threading
 import time
+import pickle
 
 class rl_mod(gr.basic_block):
     """
     Learnable RL-like modulator
     """
-    def __init__(self, tag_name="packet_num", bpmsg = 2, packet_len=256, batch_size=1, mod = 1000, lr = 0.05, exp_noise = 0.01, on = True ):
+    def __init__(self, tag_name="packet_num", bpmsg = 2, packet_len=256, batch_size=1, mod = 1000, lr = 0.05, exp_noise = 0.01, on = True , save_folder=""):
         gr.basic_block.__init__(self,
             name="rl_mod",
             in_sig=[np.int8, ],
-            out_sig=[np.complex64, ])
+            out_sig=[np.complex64, np.complex64])
 
         self.tag_name = tag_name
         self.packet_len = packet_len
@@ -50,6 +51,9 @@ class rl_mod(gr.basic_block):
         self.grad_buffer = []
         self.msg_list = []
         self.resetting = False
+        self.loading = False
+        print("HERE!!!!!!!!!!!!!!!")
+        self.save_folder = save_folder + "/"
 
         self.set_output_multiple(self.packet_len*self.batch_size)
         self.message_port_register_in(pmt.intern('losses'))
@@ -77,6 +81,17 @@ class rl_mod(gr.basic_block):
             # threading.Thread(target=self.handle_callback_data, args=(msg,)).start()
             self.handle_callback_data(msg)
             # print(len(self.msg_list))
+    def save_model(self):
+        file_name = self.save_folder + "_" + time.strftime("%y%m%d%H%M", time.localtime()) + "_" + str(self.bits_per_msg) + "_TX.pickle"
+        file_obj = open(file_name,'wb')
+        pickle.dump(self.embedding.numpy(), file_obj, protocol=4) # Rajouté pour compatibilité avec Python2
+        file_obj.close()
+
+    def load_model(self, name):
+        self.to_load = self.save_folder + "_" + name + "_" + str(self.bits_per_msg) + "_TX.pickle"
+        self.loading = True
+        self.resetting = True
+
 
 
     def handle_callback_data(self, msg):
@@ -94,6 +109,7 @@ class rl_mod(gr.basic_block):
                 else:
                     with stored[1][1] as tape:
                         final_loss = stored[1][0] * losses[self.packet_len*i: self.packet_len*(i+1)]  # Stored grad * received crossentropy loss
+                        # print(losses[self.packet_len*i: self.packet_len*(i+1)])
                         mean_loss = tf.reduce_mean(final_loss, axis=0)
                     # print(final_loss)
                     grad = tape.gradient(mean_loss, self.embedding)
@@ -116,7 +132,7 @@ class rl_mod(gr.basic_block):
 
     def set_lr(self, lr):
         self.learning_rate = lr
-        self.optimizer = tf.optimizers.Adam(self.learning_rate)
+        self.optimizer.learning_rate = lr
         print("TX: Changing learning rate to {}".format(self.learning_rate))
 
     def set_explo_noise(self, noise):
@@ -128,27 +144,34 @@ class rl_mod(gr.basic_block):
         for i in range(len(ninput_items_required)):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
-    @tf.function
+    # @tf.function
     def inference(self, input):
         norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
         clean = tf.nn.embedding_lookup(norm, input)
         return clean
 
-    @tf.function
+    # @tf.function
     def inference_and_explo(self, input):
         norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
         clean = tf.nn.embedding_lookup(norm, input)
 
         noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
         loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
-        return loss, noisy
+        return loss, noisy, clean
 
     def general_work(self, input_items, output_items):
 
         tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
 
         if self.resetting:
-            self.embedding = tf.Variable(tf.random.uniform([2**self.bits_per_msg,self.real_chan_uses], minval=-1, maxval=1), trainable=True)
+            if self.loading:
+                emb = pickle.load(open(self.to_load ,'rb'), encoding='latin1')
+                print(emb)
+                self.embedding = tf.Variable(emb, trainable = True)
+                print("Loading model TX")
+                self.loading = False
+            else:
+                self.embedding = tf.Variable(tf.random.uniform([2**self.bits_per_msg,self.real_chan_uses], minval=-1, maxval=1), trainable=True)
             # self.model = self.TX_Model(self.real_chan_uses)
             self.optimizer = tf.optimizers.Adam(self.learning_rate)
             self.grad_buffer = []
@@ -158,6 +181,12 @@ class rl_mod(gr.basic_block):
         tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
         if len(tags0) == 0:
             print("TX: We are missing tags at input")
+            print("TX: Tag expected at index: {}".format(self.nitems_read(0)))
+            tags1 = self.get_tags_in_window(0,  0 , 1, pmt.intern("packet_len"))
+            if len(tags1)!=0:
+                print("TX: packet length tag was there though")
+            self.consume(0, self.packet_len)
+            return 0
 
         # Who is going to learn from this packet.
         learner = 'TX'
@@ -171,14 +200,16 @@ class rl_mod(gr.basic_block):
             messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
             for i in range(self.batch_size):
                 with tf.GradientTape(persistent=True) as tape:
-                    loss, noisy = self.inference_and_explo(messages[self.packet_len*i: self.packet_len*(i+1)])
+                    loss, noisy, clean = self.inference_and_explo(messages[self.packet_len*i: self.packet_len*(i+1)])
                     self.grad_buffer.append((pmt.to_python(tags0[0].value), (loss, tape)))
                     output_items[0][self.packet_len*i: self.packet_len*(i+1)] = noisy.numpy().view(dtype=np.complex64)[:,0]
+                    output_items[1][self.packet_len*i: self.packet_len*(i+1)] = clean.numpy().view(dtype=np.complex64)[:,0]
             output_samples = self.packet_len * self.batch_size
         else:
             messages = np.int32(np.uint8(input_items[0][:self.packet_len*self.batch_size]))
             out = self.inference(messages)
             output_items[0][:self.packet_len*self.batch_size] = out.numpy().view(dtype=np.complex64)[:,0]
+            output_items[1][:self.packet_len*self.batch_size] = out.numpy().view(dtype=np.complex64)[:,0]
             # while len(self.msg_list) > 0:
             #     self.handle_callback_data(self.msg_list.pop(0))
             output_samples = self.packet_len*self.batch_size

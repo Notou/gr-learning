@@ -4,13 +4,15 @@ category: '[learning]'
 
 templates:
   imports: import learning
-  make: learning.rl_mod(${tag_name}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${explo_noise}, ${state})
+  make: learning.rl_mod(${tag_name}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${explo_noise}, ${state}, ${folder})
   callbacks:
   - reset()
   - set_alternate(${training_mod})
   - set_lr(${lr})
   - set_explo_noise(${explo_noise})
   - set_training_state(${state})
+  - load_model(${file})
+  - save_model()
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -50,6 +52,12 @@ parameters:
   label: Exploration noise
   dtype: float
   default: '0.01'
+- id: folder
+  label: Save folder
+  dtype: file_open
+- id: file
+  label: Save timestamp
+  dtype: string
 
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:
@@ -74,6 +82,11 @@ outputs:
   dtype: complex
   vlen: 1
   optional: 0
+- label: clean
+  domain: stream
+  dtype: complex
+  vlen: 1
+  optional: 1
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

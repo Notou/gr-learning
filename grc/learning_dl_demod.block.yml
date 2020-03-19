@@ -4,12 +4,14 @@ category: '[learning]'
 
 templates:
   imports: import learning
-  make: learning.dl_demod(${tag_name}, ${bitwise}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${tstate})
+  make: learning.dl_demod(${tag_name}, ${bitwise}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${tstate}, ${folder})
   callbacks:
   - reset()
   - set_alternate(${training_mod})
   - set_lr(${lr})
   - set_training_state(${tstate})
+  - load_model(${file})
+  - save_model()
 
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
@@ -49,6 +51,12 @@ parameters:
   label: Learning rate
   dtype: float
   default: '0.05'
+- id: folder
+  label: Save folder
+  dtype: file_open
+- id: file
+  label: Save timestamp
+  dtype: string
 
 
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
@@ -71,7 +79,12 @@ inputs:
   optional: 1
 
 outputs:
-- label: out
+- label: soft dec
+  domain: stream
+  dtype: float
+  vlen: ${bitspmsg}
+  optional: 0
+- label: hard dec
   domain: stream
   dtype: byte
   vlen: 1

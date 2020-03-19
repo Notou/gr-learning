@@ -31,11 +31,11 @@ class dl_demod(gr.basic_block):
     """
     Implements a learnable deep learning based demodulator
     """
-    def __init__(self, tag_name="packet_num", bitwise = True, bpmsg = 2, packet_len=256, batch_size=1, mod = 1000, lr = 0.05, on = True ):
+    def __init__(self, tag_name="packet_num", bitwise = True, bpmsg = 2, packet_len=256, batch_size=1, mod = 1000, lr = 0.05, on = True , save_folder=""):
         gr.basic_block.__init__(self,
             name="DL Demod",
             in_sig=[np.complex64, np.int8],
-            out_sig=[np.int8, np.int8])
+            out_sig=[(np.float32,bpmsg), np.int8, np.int8])
         self.tag_name = tag_name
         self.packet_len = packet_len
         self.batch_size = batch_size
@@ -43,6 +43,7 @@ class dl_demod(gr.basic_block):
         self.printoften = 1000
         self.printcount = 0
         self.resetting = False
+        self.loading = False
         self.set_output_multiple(self.packet_len*self.batch_size)
         self.message_port_register_out(pmt.intern("losses"))
 
@@ -51,6 +52,8 @@ class dl_demod(gr.basic_block):
         self.starting = True
 
         self.bitwise = bitwise
+
+        self.save_folder = save_folder + "/"
 
         #model parameters
         self.learning_rate = lr
@@ -61,7 +64,7 @@ class dl_demod(gr.basic_block):
         self.model = self.RX_Model(self.real_chan_uses, self.bits_per_msg)
 
         if self.bitwise:
-            print("Bitwise")    # Bitwise
+            print("Bitwise!!!!!!!!!!!!!!!!!!!")    # Bitwise
             self.loss_function = tf.nn.sigmoid_cross_entropy_with_logits # Bitwise
         else:
             print("Symbol wise")# Symbol wise
@@ -95,8 +98,17 @@ class dl_demod(gr.basic_block):
 
     def set_lr(self, lr):
         self.learning_rate = lr
-        self.optimizer = tf.optimizers.Adam(self.learning_rate)
+        self.optimizer.learning_rate = lr
         print("RX : Changing learning rate to {}".format(self.learning_rate))
+
+    def save_model(self):
+        file_name = self.save_folder + "_" + time.strftime("%y%m%d%H%M", time.localtime()) + "_" + str(self.bits_per_msg) + "_RX.h5"
+        self.model.save(file_name)
+
+    def load_model(self, name):
+        self.to_load = self.save_folder + "_" + name + "_" + str(self.bits_per_msg) + "_RX.h5"
+        self.loading = True
+        self.resetting = True
 
 
     def forecast(self, noutput_items, ninput_items_required):
@@ -105,7 +117,7 @@ class dl_demod(gr.basic_block):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
 
-    @tf.function
+    # @tf.function
     def train(self, input, label, bitwise):
         with tf.GradientTape(persistent=False) as tape:
             estimation = self.model(input)
@@ -138,6 +150,10 @@ class dl_demod(gr.basic_block):
         if self.resetting:
             self.model = self.RX_Model(self.real_chan_uses, self.bits_per_msg)
             self.optimizer = tf.optimizers.Adam(self.learning_rate)
+            if self.loading:
+                self.model = tf.keras.models.load_model(self.to_load)
+                self.loading = False
+                print("Loading model RX")
             self.resetting = False
 
         #Verify presence of tags? Not mandatory
@@ -167,8 +183,7 @@ class dl_demod(gr.basic_block):
 
         #Preprocess data and labels
         input_real = np.stack((input[:samples].real, input[:samples].imag), axis=-1)
-        print(input_real.shape)
-        if self.bitwise: # Testé
+        if self.bitwise:
             label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:samples]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little'))
             # label = np.float32(np.unpackbits(np.reshape(np.uint8(labels[:self.packet_len*self.batch_size]), (-1,1)), axis=1, count=self.bits_per_msg, bitorder='little')) # Bitwise
         else:
@@ -197,16 +212,17 @@ class dl_demod(gr.basic_block):
                 # end  = time.time()
                 # print("RX estimation {} per packet over {} packets".format((end-begin)/chunk[1], chunk[1]))
 
+            output_items[0][start : stop] = estimation[:,:self.bits_per_msg]
             if self.bitwise:
                 output_bits = np.reshape(np.packbits(np.uint8((tf.sign(estimation)+1)/2), axis=-1, bitorder='little'),(-1,)) # Bitwise
             else:
                 output_bits = tf.argmax(estimation, axis=1)   # Symbol wise
-            output_items[0][start : stop] = output_bits
+            output_items[1][start : stop] = output_bits
             packets_seen += chunk[1]
 
 
         # output_items[0][:self.packet_len*self.batch_size] = output_bits
-        output_items[1][:samples] = labels[:samples]
+        output_items[2][:samples] = labels[:samples]
 
         self.consume(0, samples)
         self.consume(1, samples)
