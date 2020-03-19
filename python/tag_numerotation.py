@@ -49,7 +49,9 @@ class tag_numerotation(gr.sync_block):
         self.modulo = modulo
         self.index = numpy.uint64(0)
         self.offset = 0
+        self.next_pos = numpy.uint64(0)
         self.id = pmt.intern('tag_numerator')
+        print("New version")
 
 
     def work(self, input_items, output_items):
@@ -58,8 +60,17 @@ class tag_numerotation(gr.sync_block):
 
         out[:] = in0
         input_size = len(input_items[0])
-        for i in range(self.offset, input_size, self.interval):
+
+        written = self.nitems_written(0)
+
+        while self.interval * self.index < written+len(output_items[0]):
             self.add_item_tag( 0, self.interval * self.index, pmt.intern(self.tag_name), pmt.to_pmt(int(self.index % self.modulo)), self.id)
             self.index = (self.index + 1)
-        self.offset = (input_size - self.offset) % self.interval
+
+        # for i in range(self.offset, input_size, self.interval):
+        #     self.add_item_tag( 0, self.interval * self.index, pmt.intern(self.tag_name), pmt.to_pmt(int(self.index % self.modulo)), self.id)
+        #     self.index = (self.index + 1)
+        #     # if i > 0:
+        #         # print("Tagnum: Multi use {}".format(self.index))
+        # self.offset = (input_size - self.offset) % self.interval
         return len(output_items[0])
