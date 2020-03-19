@@ -1,7 +1,11 @@
 '[GR-learning]':
 - learning_align
+- learning_ber_bf
+- learning_button
 - learning_correlator
 - learning_data_switch
+- learning_dl_demod
+- learning_dl_eq_demod
 - learning_error_estimator
 - learning_head
 - learning_header_reader
@@ -9,6 +13,8 @@
 - learning_packet_header
 - learning_packet_isolator
 - learning_packet_isolator_c
+- learning_rl_mod
+- learning_sweeper
 - learning_sync_rl_preprocessor
 - learning_tag_numerotation
 - learning_udp_trigger

@@ -32,6 +32,7 @@ install(FILES
     learning_head.block.yml
     learning_data_switch.block.yml
     learning_dl_demod.block.yml
+    learning_dl_eq_demod.block.yml
     learning_ber_bf.block.yml
     learning_sweeper.block.yml
     learning_rl_mod.block.yml

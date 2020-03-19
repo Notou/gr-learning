@@ -41,6 +41,7 @@ from .header_reader import header_reader
 from .udp_trigger import udp_trigger
 from .data_switch import data_switch
 from .dl_demod import dl_demod
+from .dl_eq_demod import dl_eq_demod
 
 from .sweeper import sweeper
 from .rl_mod import rl_mod
