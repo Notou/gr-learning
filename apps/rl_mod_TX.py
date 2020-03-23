@@ -34,7 +34,7 @@ import learning
 import numpy as np
 
 class rl_mod_TX(gr.top_block):
-    def __init__(self, doc):
+    def __init__(self, doc, ip="127.0.0.1"):
         gr.top_block.__init__(self, "RL Mod training")
         self.doc = doc
         self.plot_lst = []
@@ -420,9 +420,16 @@ class rl_mod_TX(gr.top_block):
     def set_bits_per_symbol_0(self, bits_per_symbol_0):
         self.bits_per_symbol_0 = bits_per_symbol_0
 
-
+def argument_parser():
+    parser = ArgumentParser()
+    parser.add_argument(
+        "-i", "--ip", dest="ip", type=str, default="127.0.0.1",
+        help="Set IP [default=%(default)r]")
+    return parser
 
 def main(top_block_cls=rl_mod_TX, options=None):
+    if options is None:
+        options = argument_parser().parse_args()
     serverProc, port = bokehgui.utils.create_server()
     def killProc(signum, frame, tb):
         tb.stop()
@@ -437,7 +444,7 @@ def main(top_block_cls=rl_mod_TX, options=None):
         session = push_session(doc, session_id="rl_mod_TX",
                                url = "http://localhost:" + port + "/bokehgui")
         # Create Top Block instance
-        tb = top_block_cls(doc)
+        tb = top_block_cls(doc, ip=options.ip)
         try:
             tb.start()
             signal.signal(signal.SIGTERM, functools.partial(killProc, tb=tb))
