@@ -42,6 +42,11 @@ class dl_demod_RX(gr.top_block):
         self.widget_lst = []
 
         ##################################################
+        # Parameters
+        ##################################################
+        self.ip = ip
+
+        ##################################################
         # Variables
         ##################################################
         self.pilot_symbols = pilot_symbols = ((1, 1, 1, -1,),)
@@ -103,8 +108,8 @@ class dl_demod_RX(gr.top_block):
         self.gain_rx_slider = bokehgui.slider(self.widget_lst, 'Amplitude Rx' +":", 0, 90, 0.5, 1, 5)
         self.gain_rx_slider.add_callback(lambda attr, old, new: self.set_gain_rx(new))
         self.blocks_probe_signal_x_0 = blocks.probe_signal_f()
-        self.zeromq_sub_msg_source_0_0 = zeromq.sub_msg_source('tcp://127.0.0.1:50001', 1000)
-        self.zeromq_pub_msg_sink_0_0_0 = zeromq.pub_msg_sink('tcp://127.0.0.1:50002', 1000)
+        self.zeromq_sub_msg_source_0_0 = zeromq.sub_msg_source("tcp://"+ip+":50001", 1000)
+        self.zeromq_pub_msg_sink_0_0_0 = zeromq.pub_msg_sink('tcp://*:50002', 1000)
         self.variable_qtgui_label_0_0 = bokehgui.label(self.widget_lst, str(variable_qtgui_label_0_0), 'BER' +": ")
         self.variable_qtgui_label_0 = bokehgui.label(self.widget_lst, str(variable_qtgui_label_0), 'Error count' +": ")
         self.uhd_usrp_source_0 = uhd.usrp_source(
@@ -244,6 +249,47 @@ class dl_demod_RX(gr.top_block):
                   1.0, 1.0, 1.0, 1.0, 1.0]
         for i in range(    1  ):
           self.bokehgui_time_const_x_0_plot.format_line(i, colors[i], widths[i], 'None', markers[i], alphas[i])
+        self.bokehgui_frequency_sink_x_0 = bokehgui.freq_sink_c_proc(1024,
+                             firdes.WIN_BLACKMAN_hARRIS,
+                             freq, samp_rate,
+                             "Rx signal",                     1                    )
+        self.bokehgui_frequency_sink_x_0_plot = bokehgui.freq_sink_c(self.doc, self.plot_lst, self.bokehgui_frequency_sink_x_0, is_message =False)
+        labels = ['', '', '', '', '',
+                  '', '', '', '', '']
+        legend_list = []
+
+        for i in  range(1):
+            if len(labels[i]) == 0:
+                legend_list.append("Data {0}".format(i))
+            else:
+                legend_list.append(labels[i])
+
+        self.bokehgui_frequency_sink_x_0_plot.initialize(update_time = 100,                           legend_list = legend_list)
+
+        self.bokehgui_frequency_sink_x_0_plot.set_y_axis([-140, 10])
+        self.bokehgui_frequency_sink_x_0_plot.set_y_label('Relative Gain' + '(' +'dB'+')')
+        self.bokehgui_frequency_sink_x_0_plot.set_x_label('Frequency' + '(' +"Hz"+')')
+
+        self.bokehgui_frequency_sink_x_0_plot.set_trigger_mode(bokehgui.TRIG_MODE_FREE,0.0, 0, "")
+
+        self.bokehgui_frequency_sink_x_0_plot.enable_grid(False)
+        self.bokehgui_frequency_sink_x_0_plot.enable_axis_labels(True)
+        self.bokehgui_frequency_sink_x_0_plot.disable_legend(not True)
+        self.bokehgui_frequency_sink_x_0_plot.set_layout(*((3,0,1,3)))
+        self.bokehgui_frequency_sink_x_0_plot.enable_max_hold()
+        colors = ["blue", "red", "green", "black", "cyan",
+                  "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        widths = [1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 1]
+        styles = ["solid", "solid", "solid", "solid", "solid",
+                  "solid", "solid", "solid", "solid", "solid"]
+        markers = [None, None, None, None, None,
+                   None, None, None, None, None]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in  range(1):
+            self.bokehgui_frequency_sink_x_0_plot.format_line(i, colors[i], widths[i], styles[i], markers[i], alphas[i])
         self.blocks_sub_xx_0 = blocks.sub_ff(1)
         self.blocks_repack_bits_bb_0_0_1_1 = blocks.repack_bits_bb(bits_per_symbol, 1, '', False, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0_0_1 = blocks.repack_bits_bb(bits_per_symbol, 1, '', False, gr.GR_LSB_FIRST)
@@ -311,8 +357,8 @@ class dl_demod_RX(gr.top_block):
         self.connect((self.digital_ofdm_sync_sc_cfb_0, 1), (self.digital_header_payload_demux_0, 1))
         self.connect((self.fft_vxx_0, 0), (self.digital_ofdm_chanest_vcvc_0, 0))
         self.connect((self.fft_vxx_1, 0), (self.digital_ofdm_frame_equalizer_vcvc_1, 0))
-        self.connect((self.learning_align_0, 0), (self.learning_dl_demod_0, 0))
         self.connect((self.learning_align_0, 1), (self.learning_dl_demod_0, 1))
+        self.connect((self.learning_align_0, 0), (self.learning_dl_demod_0, 0))
         self.connect((self.learning_ber_bf_0, 0), (self.blocks_probe_signal_x_0, 0))
         self.connect((self.learning_dl_demod_0, 1), (self.blocks_char_to_float_0_0, 0))
         self.connect((self.learning_dl_demod_0, 2), (self.blocks_char_to_float_0_0_0, 0))
@@ -320,7 +366,14 @@ class dl_demod_RX(gr.top_block):
         self.connect((self.learning_dl_demod_0, 2), (self.blocks_repack_bits_bb_0_0_1, 0))
         self.connect((self.learning_dl_demod_0, 1), (self.blocks_repack_bits_bb_0_0_1_1, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_delay_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.bokehgui_frequency_sink_x_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.digital_ofdm_sync_sc_cfb_0, 0))
+
+    def get_ip(self):
+        return self.ip
+
+    def set_ip(self, ip):
+        self.ip = ip
 
     def get_pilot_symbols(self):
         return self.pilot_symbols
@@ -490,6 +543,7 @@ class dl_demod_RX(gr.top_block):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.blocks_throttle_0.set_sample_rate(self.samp_rate/6)
+        self.bokehgui_frequency_sink_x_0.set_frequency_range(self.freq, self.samp_rate)
         self.bokehgui_time_const_x_0.set_samp_rate(self.samp_rate)
         self.bokehgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
@@ -580,6 +634,7 @@ class dl_demod_RX(gr.top_block):
 
     def set_freq(self, freq):
         self.freq = freq
+        self.bokehgui_frequency_sink_x_0.set_frequency_range(self.freq, self.samp_rate)
         self.uhd_usrp_source_0.set_center_freq(self.freq, 0)
 
     def get_bits_per_symbol_0(self):
@@ -588,13 +643,13 @@ class dl_demod_RX(gr.top_block):
     def set_bits_per_symbol_0(self, bits_per_symbol_0):
         self.bits_per_symbol_0 = bits_per_symbol_0
 
+
 def argument_parser():
     parser = ArgumentParser()
     parser.add_argument(
-        "-i", "--ip", dest="ip", type=str, default="127.0.0.1",
+        "-i", "--ip", dest="ip", type=str, default='localhost',
         help="Set IP [default=%(default)r]")
     return parser
-
 
 
 def main(top_block_cls=dl_demod_RX, options=None):

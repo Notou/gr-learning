@@ -41,6 +41,11 @@ class rl_mod_TX(gr.top_block):
         self.widget_lst = []
 
         ##################################################
+        # Parameters
+        ##################################################
+        self.ip = ip
+
+        ##################################################
         # Variables
         ##################################################
         self.pilot_symbols = pilot_symbols = ((1, 1, 1, -1,),)
@@ -92,8 +97,8 @@ class rl_mod_TX(gr.top_block):
                   lambda new: self.set_t_state(int(self._t_state_options[new])))
         self.gain_slider = bokehgui.slider(self.widget_lst, 'Amplitude' +":", 0, 90, 0.5, 1, 10)
         self.gain_slider.add_callback(lambda attr, old, new: self.set_gain(new))
-        self.zeromq_sub_msg_source_0_1 = zeromq.sub_msg_source('tcp://127.0.0.1:50002', 100)
-        self.zeromq_pub_msg_sink_0_0 = zeromq.pub_msg_sink('tcp://127.0.0.1:50001', 100)
+        self.zeromq_sub_msg_source_0_1 = zeromq.sub_msg_source("tcp://"+ip+":50002", 100)
+        self.zeromq_pub_msg_sink_0_0 = zeromq.pub_msg_sink('tcp://*:50001', 100)
         self.uhd_usrp_sink_0 = uhd.usrp_sink(
             ",".join(("", "")),
             uhd.stream_args(
@@ -210,6 +215,12 @@ class rl_mod_TX(gr.top_block):
         self.connect((self.learning_rl_mod_0, 1), (self.bokehgui_time_const_x_0, 0))
         self.connect((self.learning_tag_numerotation_0, 0), (self.blocks_throttle_0, 0))
         self.connect((self.learning_tag_numerotation_0, 0), (self.learning_rl_mod_0, 0))
+
+    def get_ip(self):
+        return self.ip
+
+    def set_ip(self, ip):
+        self.ip = ip
 
     def get_pilot_symbols(self):
         return self.pilot_symbols
@@ -420,12 +431,14 @@ class rl_mod_TX(gr.top_block):
     def set_bits_per_symbol_0(self, bits_per_symbol_0):
         self.bits_per_symbol_0 = bits_per_symbol_0
 
+
 def argument_parser():
     parser = ArgumentParser()
     parser.add_argument(
         "-i", "--ip", dest="ip", type=str, default="127.0.0.1",
         help="Set IP [default=%(default)r]")
     return parser
+
 
 def main(top_block_cls=rl_mod_TX, options=None):
     if options is None:
