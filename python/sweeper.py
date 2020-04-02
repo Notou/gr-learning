@@ -89,4 +89,6 @@ class sweeper(gr.sync_block):
         out[0] = self.results
         output_items[1][0] = np.log10(0.0000001+special.erfc(np.sqrt(10**(self.snrs/10))))
 
-        return len(output_items[0])
+        # print(len(output_items[0]))
+
+        return 1
