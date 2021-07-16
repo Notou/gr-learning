@@ -3,7 +3,7 @@ label: Align
 category: '[learning]'
 templates:
   imports: import learning
-  make: learning.align(${tag_name}, ${frame_size}, ${vec_len}, ${user_symbols})
+  make: learning.align(${tag_name}, ${frame_size}, ${label_frame_size}, ${vec_len}, ${user_symbols})
 parameters:
 - id: tag_name
   label: Tag name
@@ -11,6 +11,11 @@ parameters:
 - id: frame_size
   label: Frame size
   dtype: int
+  default: '400'
+- id: label_frame_size
+  label: Label Frame size
+  dtype: int
+  default: '400'
 - id: vec_len
   label: Vector length
   dtype: int

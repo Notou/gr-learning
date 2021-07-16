@@ -1,6 +1,7 @@
 options:
   parameters:
     author: Cyrille Morin
+    catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
     comment: ''
@@ -22,7 +23,6 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: RL Mod/Demod training
-    window_size: ''
   states:
     bus_sink: false
     bus_source: false
@@ -516,7 +516,7 @@ blocks:
     bus_structure: null
     coordinate: [1272, 1440.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_complex_to_magphase_0_0
   id: blocks_complex_to_magphase
   parameters:
@@ -530,9 +530,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1280, 1552.0]
+    coordinate: [1472, 1552.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_complex_to_magphase_0_0_0
   id: blocks_complex_to_magphase
   parameters:
@@ -549,6 +549,22 @@ blocks:
     coordinate: [960, 1680.0]
     rotation: 0
     state: true
+- name: blocks_complex_to_magphase_0_0_1
+  id: blocks_complex_to_magphase
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1480, 1624.0]
+    rotation: 0
+    state: enabled
 - name: blocks_ctrlport_monitor_0
   id: blocks_ctrlport_monitor
   parameters:
@@ -612,7 +628,7 @@ blocks:
     bus_structure: null
     coordinate: [1064, 1436.0]
     rotation: 0
-    state: bypassed
+    state: disabled
 - name: blocks_keep_m_in_n_0_0
   id: blocks_keep_m_in_n
   parameters:
@@ -629,9 +645,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1056, 1548.0]
+    coordinate: [1112, 1548.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_keep_m_in_n_0_0_0
   id: blocks_keep_m_in_n
   parameters:
@@ -651,6 +667,25 @@ blocks:
     coordinate: [880, 1556.0]
     rotation: 0
     state: bypassed
+- name: blocks_keep_m_in_n_0_0_1
+  id: blocks_keep_m_in_n
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    m: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n: fft_len
+    offset: 11+14
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1112, 1620.0]
+    rotation: 0
+    state: enabled
 - name: blocks_multiply_const_xx_0
   id: blocks_multiply_const_xx
   parameters:
@@ -783,7 +818,7 @@ blocks:
     bus_structure: null
     coordinate: [992, 676.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_tag_gate_0_0
   id: blocks_tag_gate
   parameters:
@@ -800,7 +835,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1160, 1620.0]
+    coordinate: [1248, 1556.0]
+    rotation: 0
+    state: enabled
+- name: blocks_tag_gate_0_0_0
+  id: blocks_tag_gate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    propagate_tags: 'False'
+    single_key: '"ofdm_sync_chan_taps"'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1256, 1628.0]
     rotation: 0
     state: enabled
 - name: blocks_tagged_stream_mux_0
@@ -841,7 +895,7 @@ blocks:
     bus_structure: null
     coordinate: [1184, 684.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_vector_to_stream_0
   id: blocks_vector_to_stream
   parameters:
@@ -859,7 +913,7 @@ blocks:
     bus_structure: null
     coordinate: [920, 1392.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_vector_to_stream_0_0
   id: blocks_vector_to_stream
   parameters:
@@ -875,9 +929,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 1488.0]
+    coordinate: [888, 1488.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_vector_to_stream_0_0_0
   id: blocks_vector_to_stream
   parameters:
@@ -1300,6 +1354,55 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [512, 1212.0]
+    rotation: 0
+    state: enabled
+- name: iio_pluto_sink_0
+  id: iio_pluto_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    attenuation1: gain
+    auto_filter: 'True'
+    bandwidth: '20000000'
+    buffer_size: '32768'
+    comment: ''
+    cyclic: 'False'
+    filter: ''
+    frequency: int(freq)
+    samplerate: int(samp_rate)
+    uri: '''ip:pluto.local'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1616, 556.0]
+    rotation: 0
+    state: enabled
+- name: iio_pluto_source_0
+  id: iio_pluto_source
+  parameters:
+    affinity: ''
+    alias: ''
+    auto_filter: 'True'
+    bandwidth: '20000000'
+    bbdc: 'True'
+    buffer_size: '32768'
+    comment: ''
+    filter: ''
+    frequency: int(freq)
+    gain1: '''manual'''
+    manual_gain1: gain_rx
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    quadrature: 'True'
+    rfdc: 'True'
+    samplerate: int(samp_rate)
+    uri: '''ip:pluto.local'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [32, 948.0]
     rotation: 0
     state: enabled
 - name: import_1
@@ -1774,11 +1877,11 @@ blocks:
     entags: 'True'
     grid: 'False'
     gui_hint: qtgui_tab_widget_0@1
-    label1: Signal 1
+    label1: Mag 1
     label10: Signal 10
-    label2: Signal 2
-    label3: Signal 3
-    label4: Signal 4
+    label2: Phase 1
+    label3: Mag 2
+    label4: Phase 2
     label5: Signal 5
     label6: Signal 6
     label7: Signal 7
@@ -1796,13 +1899,13 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: '""'
-    nconnections: '2'
+    nconnections: '4'
     size: '64'
     srate: samp_rate
     stemplot: 'False'
     style1: '1'
     style10: '1'
-    style2: '1'
+    style2: '0'
     style3: '1'
     style4: '1'
     style5: '1'
@@ -1836,7 +1939,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1488, 1500.0]
+    coordinate: [1728, 1548.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0_1
@@ -2699,11 +2802,15 @@ connections:
 - [blocks_complex_to_magphase_0_0, '1', qtgui_time_sink_x_0_0, '1']
 - [blocks_complex_to_magphase_0_0_0, '0', qtgui_time_sink_x_0_1, '0']
 - [blocks_complex_to_magphase_0_0_0, '1', qtgui_time_sink_x_0_1, '1']
+- [blocks_complex_to_magphase_0_0_1, '0', qtgui_time_sink_x_0_0, '2']
+- [blocks_complex_to_magphase_0_0_1, '1', qtgui_time_sink_x_0_0, '3']
 - [blocks_delay_0, '0', blocks_multiply_xx_0, '0']
 - [blocks_keep_m_in_n_0, '0', blocks_tag_gate_0_0, '0']
 - [blocks_keep_m_in_n_0_0, '0', blocks_tag_gate_0_0, '0']
 - [blocks_keep_m_in_n_0_0_0, '0', blocks_complex_to_magphase_0_0_0, '0']
+- [blocks_keep_m_in_n_0_0_1, '0', blocks_tag_gate_0_0_0, '0']
 - [blocks_multiply_const_xx_0, '0', blocks_tag_gate_0, '0']
+- [blocks_multiply_const_xx_0, '0', iio_pluto_sink_0, '0']
 - [blocks_multiply_const_xx_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_multiply_xx_0, '0', digital_header_payload_demux_0, '0']
 - [blocks_repack_bits_bb_0_0, '0', blocks_stream_to_tagged_stream_0_0, '0']
@@ -2713,12 +2820,14 @@ connections:
 - [blocks_tag_gate_0, '0', blocks_throttle_0_0, '0']
 - [blocks_tag_gate_0_0, '0', blocks_complex_to_magphase_0, '0']
 - [blocks_tag_gate_0_0, '0', blocks_complex_to_magphase_0_0, '0']
+- [blocks_tag_gate_0_0_0, '0', blocks_complex_to_magphase_0_0_1, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_0_0_0_0, '0']
 - [blocks_throttle_0_0, '0', blocks_delay_0, '0']
 - [blocks_throttle_0_0, '0', digital_ofdm_sync_sc_cfb_0, '0']
 - [blocks_vector_to_stream_0, '0', blocks_keep_m_in_n_0, '0']
 - [blocks_vector_to_stream_0, '0', qtgui_time_sink_x_0, '0']
 - [blocks_vector_to_stream_0_0, '0', blocks_keep_m_in_n_0_0, '0']
+- [blocks_vector_to_stream_0_0, '0', blocks_keep_m_in_n_0_0_1, '0']
 - [blocks_vector_to_stream_0_0_0, '0', blocks_keep_m_in_n_0_0_0, '0']
 - [digital_chunks_to_symbols_xx_0, '0', blocks_tagged_stream_mux_0, '0']
 - [digital_chunks_to_symbols_xx_0_0, '0', blocks_tagged_stream_mux_0, '1']
@@ -2748,6 +2857,8 @@ connections:
 - [fft_vxx_1, '0', blocks_vector_to_stream_0_0, '0']
 - [fft_vxx_1, '0', digital_ofdm_frame_equalizer_vcvc_1, '0']
 - [fft_vxx_1, '0', epy_block_0, '0']
+- [iio_pluto_source_0, '0', blocks_delay_0, '0']
+- [iio_pluto_source_0, '0', digital_ofdm_sync_sc_cfb_0, '0']
 - [learning_tag_numerotation_0, '0', digital_chunks_to_symbols_xx_0_0, '0']
 - [learning_tag_numerotation_0, '0', digital_chunks_to_symbols_xx_0_0_0, '0']
 - [uhd_usrp_source_0, '0', blocks_delay_0, '0']

@@ -30,18 +30,21 @@ class sweeper(gr.sync_block):
     """
     Sweeps a range of snr values to gather a BER curve
     """
-    def __init__(self, top_block, snrs, error_threshold, ber_block=None, probe_block = None, snr_variable = None):
+    def __init__(self, top_block, snrs, error_threshold, ber_block_1=None, ber_block_2=None, probe_block_1 = None, probe_block_2 = None, snr_variable = None):
 
         self.top_block = top_block
-        self.ber_block = ber_block
-        self.probe_block = probe_block
+        self.ber_block_1 = ber_block_1
+        self.ber_block_2 = ber_block_2
+        self.probe_block_1 = probe_block_1
+        self.probe_block_2 = probe_block_2
         self.snr_variable = snr_variable
 
         self.error_threshold = error_threshold
 
         self.index = 0
         self.snrs = snrs
-        self.results = np.zeros((len(self.snrs),))
+        self.results_1 = np.ones((len(self.snrs),))*0.000001
+        self.results_2 = np.log10(0.0000001+special.erfc(np.sqrt(10**(self.snrs/10))))
 
         gr.sync_block.__init__(self,
         name="Sweeper",
@@ -51,26 +54,36 @@ class sweeper(gr.sync_block):
         self.started = False
 
     def start_sweep(self):
+        print("Start sweep")
         self.index = 0
         self.snr_variable(self.snrs[self.index])
         # self.results = np.zeros((len(self.snrs),))
 
         # time.sleep(1)
-        getattr(self.top_block, self.ber_block).reset_counters()
+        getattr(self.top_block, self.ber_block_1).reset_counters()
+        getattr(self.top_block, self.ber_block_2).reset_counters()
         self.started = True
 
     def stop_sweep(self):
+        print("Stop sweep")
         self.started = False
-        getattr(self.top_block, self.ber_block).reset_counters()
-        print(self.results)
+        getattr(self.top_block, self.ber_block_1).reset_counters()
+        getattr(self.top_block, self.ber_block_2).reset_counters()
+        print(self.results_1)
+        print(self.results_2)
 
     def set_error_count(self, errors):
-        self.error_count = errors
-
+        # self.error_count = errors
         if self.started:
+            print("Sweeper called")
             # Get BER info
-            self.results[self.index] = getattr(self.top_block, self.probe_block).level()
-            if errors > self.error_threshold:
+            self.results_1[self.index] = getattr(self.top_block, self.probe_block_1).level()
+            self.results_2[self.index] = getattr(self.top_block, self.probe_block_2).level()
+
+            errors_1 = getattr(self.top_block, self.ber_block_1).total_errors()
+            errors_2 = getattr(self.top_block, self.ber_block_2).total_errors()
+            print("Error 1: {}  Error 2: {}".format(errors_1, errors_2))
+            if errors_1 > self.error_threshold and errors_2 > self.error_threshold:
                 self.index += 1
                 if self.index >= len(self.snrs):
                     print(self.index, len(self.snrs))
@@ -80,14 +93,17 @@ class sweeper(gr.sync_block):
                 print("SNR to: {} and resetting ber".format(self.snrs[self.index]))
                 # Reset BER Block
                 time.sleep(1.5)
-                getattr(self.top_block, self.ber_block).reset_counters()
+                getattr(self.top_block, self.ber_block_1).reset_counters()
+                getattr(self.top_block, self.ber_block_2).reset_counters()
                 # print(self.results)
 
     def work(self, input_items, output_items):
-        out = output_items[0]
-        time.sleep(0.5)
-        out[0] = self.results
-        output_items[1][0] = np.log10(0.0000001+special.erfc(np.sqrt(10**(self.snrs/10))))
+        out_1 = output_items[0]
+        out_2 = output_items[1]
+        # time.sleep(0.5)
+        out_1[0] = self.results_1
+        out_2[0] = self.results_2
+        # output_items[1][0] = np.log10(0.0000001+special.erfc(np.sqrt(10**(self.snrs/10))))
 
         # print(len(output_items[0]))
 

@@ -14,13 +14,13 @@ options:
     id: dl_demod_RX
     max_nouts: '0'
     output_language: python
-    placement: (0,0,2,1)
+    placement: (0,0,4,1)
     qt_qss_theme: ''
     realtime_scheduling: ''
     run: 'True'
     run_command: '{python} -u {filename}'
     run_options: prompt
-    sizing_mode: stretch_both
+    sizing_mode: fixed
     thread_safe_setters: ''
     title: RL Demod training
   states:
@@ -45,7 +45,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1960, 1612.0]
+    coordinate: [1608, 1540.0]
     rotation: 0
     state: enabled
 - name: bits_per_symbol
@@ -109,7 +109,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [176, 12.0]
+    coordinate: [184, 12.0]
     rotation: 0
     state: true
 - name: gain_rx
@@ -137,7 +137,6 @@ blocks:
     gui_hint: qtgui_tab_widget_0@0:0,4,2,2
     label: Amplitude Rx
     min_len: '200'
-    orient: Qt.Horizontal
     rangeType: float
     start: '0'
     step: '.2'
@@ -200,6 +199,46 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [656, 12.0]
+    rotation: 0
+    state: enabled
+- name: ip
+  id: variable
+  parameters:
+    comment: ''
+    value: '"localhost"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [432, 260.0]
+    rotation: 0
+    state: enabled
+- name: label_ber
+  id: variable_bokehgui_label
+  parameters:
+    comment: ''
+    label: BER
+    type: raw
+    value: ber
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1784, 1636.0]
+    rotation: 0
+    state: enabled
+- name: label_errors
+  id: variable_bokehgui_label
+  parameters:
+    comment: ''
+    label: Error count
+    type: int
+    value: errors
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1784, 1556.0]
     rotation: 0
     state: enabled
 - name: ldpc_dec
@@ -267,7 +306,6 @@ blocks:
     gui_hint: qtgui_tab_widget_0@0:2,0,2,4
     label: Eb/N0
     min_len: '200'
-    orient: Qt.Horizontal
     rangeType: float
     start: snr_start
     step: '0.1'
@@ -397,16 +435,14 @@ blocks:
     coordinate: [280, 460.0]
     rotation: 0
     state: true
-- name: reset_ber
-  id: learning_button
+- name: reset_ber_0
+  id: variable_bokehgui_button
   parameters:
-    alias: ''
     block_id: learning_ber_bf_0
     comment: ''
     function_args: ''
     function_name: reset_counters
-    gui_hint: qtgui_tab_widget_0@0:5,2,1,2
-    label: '"Reset &BER last: {}".format(reset_ber)'
+    label: '"Reset BER last: {}".format(reset_ber)'
     type: real
     value: '0'
   states:
@@ -415,7 +451,7 @@ blocks:
     bus_structure: null
     coordinate: [1784, 1444.0]
     rotation: 0
-    state: disabled
+    state: true
 - name: reset_rx
   id: learning_button
   parameters:
@@ -435,6 +471,23 @@ blocks:
     coordinate: [728, 2132.0]
     rotation: 0
     state: disabled
+- name: reset_rx_0
+  id: variable_bokehgui_button
+  parameters:
+    block_id: learning_dl_demod_0
+    comment: ''
+    function_args: ''
+    function_name: reset
+    label: Reset RX model state
+    type: int
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 2132.0]
+    rotation: 0
+    state: true
 - name: rolloff
   id: variable
   parameters:
@@ -454,7 +507,6 @@ blocks:
     gui_hint: qtgui_tab_widget_0@0:10,4,1,2
     label: RX Learning rate (log)
     min_len: '200'
-    orient: Qt.Horizontal
     rangeType: float
     start: '-5'
     step: '0.1'
@@ -572,6 +624,23 @@ blocks:
     coordinate: [560, 1988.0]
     rotation: 0
     state: disabled
+- name: start_button_0
+  id: variable_bokehgui_button
+  parameters:
+    block_id: learning_sweeper_0
+    comment: ''
+    function_args: ''
+    function_name: start_sweep
+    label: Start sweep
+    type: int
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 2012.0]
+    rotation: 0
+    state: disabled
 - name: stop_button
   id: learning_button
   parameters:
@@ -589,6 +658,23 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [720, 1988.0]
+    rotation: 0
+    state: disabled
+- name: stop_button_0
+  id: variable_bokehgui_button
+  parameters:
+    block_id: learning_sweeper_0
+    comment: ''
+    function_args: ''
+    function_name: stop_sweep
+    label: Stop sweep
+    type: int
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 2012.0]
     rotation: 0
     state: disabled
 - name: sync_word1
@@ -749,50 +835,6 @@ blocks:
     coordinate: [1321, 176]
     rotation: 0
     state: true
-- name: variable_qtgui_label_0
-  id: variable_bokehgui_label
-  parameters:
-    comment: ''
-    label: Error count
-    type: int
-    value: errors
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1784, 1548.0]
-    rotation: 0
-    state: enabled
-- name: variable_qtgui_label_0
-  id: variable_qtgui_label
-  parameters:
-    comment: ''
-    formatter: None
-    gui_hint: qtgui_tab_widget_0@0:4,2,1,2
-    label: Error count
-    type: int
-    value: errors
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1608, 1540.0]
-    rotation: 0
-    state: disabled
-- name: variable_qtgui_label_0_0
-  id: variable_bokehgui_label
-  parameters:
-    comment: ''
-    label: BER
-    type: real
-    value: ber
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1784, 1628.0]
-    rotation: 0
-    state: enabled
 - name: analog_frequency_modulator_fc_0
   id: analog_frequency_modulator_fc
   parameters:
@@ -1010,7 +1052,7 @@ blocks:
     bus_structure: null
     coordinate: [216, 612.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_pdu_to_tagged_stream_0_0
   id: blocks_pdu_to_tagged_stream
   parameters:
@@ -1039,7 +1081,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1464, 1480.0]
+    coordinate: [1448, 1484.0]
     rotation: 0
     state: enabled
 - name: blocks_repack_bits_bb_0_0_1
@@ -1157,7 +1199,7 @@ blocks:
     bus_structure: null
     coordinate: [440, 612.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_vector_to_stream_1
   id: blocks_vector_to_stream
   parameters:
@@ -1174,6 +1216,106 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [760, 1640.0]
+    rotation: 0
+    state: disabled
+- name: bokehgui_frequency_sink_x_0
+  id: bokehgui_frequency_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    average: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    fc: freq
+    fftsize: '1024'
+    freqhalf: 'False'
+    grid: 'False'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    marker1: None
+    marker10: None
+    marker2: None
+    marker3: None
+    marker4: None
+    marker5: None
+    marker6: None
+    marker7: None
+    marker8: None
+    marker9: None
+    maxhold: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Rx signal"'
+    nconnections: '1'
+    placement: (3,1,1,2)
+    style1: '"solid"'
+    style10: '"solid"'
+    style2: '"solid"'
+    style3: '"solid"'
+    style4: '"solid"'
+    style5: '"solid"'
+    style6: '"solid"'
+    style7: '"solid"'
+    style8: '"solid"'
+    style9: '"solid"'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: bokehgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    update_time: '100'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+    xlabel: Frequency
+    xunit: '"Hz"'
+    ylabel: Relative Gain
+    ymax: '10'
+    ymin: '-140'
+    yunit: dB
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 756.0]
     rotation: 0
     state: disabled
 - name: bokehgui_time_const_x_0
@@ -1325,7 +1467,7 @@ blocks:
     marker9: None
     name: '"Decoded minus label"'
     nconnections: '1'
-    placement: (2,0,1,3)
+    placement: (2,1,1,2)
     size: '1024'
     srate: samp_rate
     style1: '"solid"'
@@ -1361,8 +1503,8 @@ blocks:
     xunit: '""'
     ylabel: Difference
     ylog: 'False'
-    ymax: '10'
-    ymin: '-10'
+    ymax: '100'
+    ymin: '-100'
     yunit: '""'
   states:
     bus_sink: false
@@ -1371,6 +1513,98 @@ blocks:
     coordinate: [1640, 1788.0]
     rotation: 0
     state: enabled
+- name: bokehgui_vector_sink_x_0
+  id: bokehgui_vector_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    average: '1.0'
+    axislabels: 'True'
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    grid: 'True'
+    label1: Learned
+    label10: ''
+    label2: QPSK
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    marker1: None
+    marker10: None
+    marker2: None
+    marker3: None
+    marker4: None
+    marker5: None
+    marker6: None
+    marker7: None
+    marker8: None
+    marker9: None
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Performance curve"'
+    nconnections: '2'
+    placement: (4,1,2,2)
+    style1: '"solid"'
+    style10: '"solid"'
+    style2: '"solid"'
+    style3: '"solid"'
+    style4: '"solid"'
+    style5: '"solid"'
+    style6: '"solid"'
+    style7: '"solid"'
+    style8: '"solid"'
+    style9: '"solid"'
+    type: float
+    update_time: '100'
+    vec_len: len(np.arange(snr_start,snr_stop,snr_step))
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    x_values: np.arange(snr_start,snr_stop,snr_step)
+    xlabel: Eb/N0
+    xunit: '"dB"'
+    ylabel: BER
+    ymax: '0'
+    ymin: '-6'
+    yunit: log
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1592, 1988.0]
+    rotation: 0
+    state: disabled
 - name: digital_constellation_decoder_cb_0
   id: digital_constellation_decoder_cb
   parameters:
@@ -1810,7 +2044,7 @@ blocks:
     bus_structure: null
     coordinate: [64, 676.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: import_1
   id: import
   parameters:
@@ -1837,6 +2071,23 @@ blocks:
     coordinate: [158, 118]
     rotation: 0
     state: enabled
+- name: ip
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: IP
+    short_id: i
+    type: str
+    value: localhost
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 252.0]
+    rotation: 0
+    state: disabled
 - name: learning_align_0
   id: learning_align
   parameters:
@@ -1844,6 +2095,7 @@ blocks:
     alias: ''
     comment: ''
     frame_size: packet_len
+    label_frame_size: '400'
     maxoutbuf: '0'
     minoutbuf: '0'
     tag_name: packet_num
@@ -1905,13 +2157,15 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    ber_id: learning_ber_bf_0
+    ber_id_1: ''
+    ber_id_2: ''
     comment: ''
     error_threshold: '200'
     errors: errors
     maxoutbuf: '0'
     minoutbuf: '0'
-    probe_id: blocks_probe_signal_x_0
+    probe_id_1: ''
+    probe_id_2: ''
     snr_var: mag
     snrs: np.arange(snr_start,snr_stop,snr_step)
   states:
@@ -2090,7 +2344,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [304, 840.0]
+    coordinate: [304, 848.0]
     rotation: 0
     state: disabled
 - name: qtgui_number_sink_1_0
@@ -2365,7 +2619,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    ant0: RX2
+    ant0: '"TX/RX"'
     ant1: RX2
     ant10: RX2
     ant11: RX2
@@ -2537,6 +2791,38 @@ blocks:
     gain7: '0'
     gain8: '0'
     gain9: '0'
+    gain_type0: default
+    gain_type1: default
+    gain_type10: default
+    gain_type11: default
+    gain_type12: default
+    gain_type13: default
+    gain_type14: default
+    gain_type15: default
+    gain_type16: default
+    gain_type17: default
+    gain_type18: default
+    gain_type19: default
+    gain_type2: default
+    gain_type20: default
+    gain_type21: default
+    gain_type22: default
+    gain_type23: default
+    gain_type24: default
+    gain_type25: default
+    gain_type26: default
+    gain_type27: default
+    gain_type28: default
+    gain_type29: default
+    gain_type3: default
+    gain_type30: default
+    gain_type31: default
+    gain_type4: default
+    gain_type5: default
+    gain_type6: default
+    gain_type7: default
+    gain_type8: default
+    gain_type9: default
     iq_imbal_enb0: '""'
     iq_imbal_enb1: '""'
     iq_imbal_enb10: '""'
@@ -2636,38 +2922,6 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     nchan: '1'
-    norm_gain0: 'False'
-    norm_gain1: 'False'
-    norm_gain10: 'False'
-    norm_gain11: 'False'
-    norm_gain12: 'False'
-    norm_gain13: 'False'
-    norm_gain14: 'False'
-    norm_gain15: 'False'
-    norm_gain16: 'False'
-    norm_gain17: 'False'
-    norm_gain18: 'False'
-    norm_gain19: 'False'
-    norm_gain2: 'False'
-    norm_gain20: 'False'
-    norm_gain21: 'False'
-    norm_gain22: 'False'
-    norm_gain23: 'False'
-    norm_gain24: 'False'
-    norm_gain25: 'False'
-    norm_gain26: 'False'
-    norm_gain27: 'False'
-    norm_gain28: 'False'
-    norm_gain29: 'False'
-    norm_gain3: 'False'
-    norm_gain30: 'False'
-    norm_gain31: 'False'
-    norm_gain4: 'False'
-    norm_gain5: 'False'
-    norm_gain6: 'False'
-    norm_gain7: 'False'
-    norm_gain8: 'False'
-    norm_gain9: 'False'
     num_mboards: '1'
     otw: ''
     rx_agc0: Disabled
@@ -2825,9 +3079,10 @@ blocks:
 - name: zeromq_pub_msg_sink_0_0_0
   id: zeromq_pub_msg_sink
   parameters:
-    address: tcp://127.0.0.1:50002
+    address: tcp://*:50002
     affinity: ''
     alias: ''
+    bind: 'True'
     comment: ''
     timeout: '1000'
   states:
@@ -2840,9 +3095,10 @@ blocks:
 - name: zeromq_sub_msg_source_0
   id: zeromq_sub_msg_source
   parameters:
-    address: tcp://127.0.0.1:50000
+    address: '"tcp://"+ip+":50000"'
     affinity: ''
     alias: ''
+    bind: 'False'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -2853,13 +3109,14 @@ blocks:
     bus_structure: null
     coordinate: [0, 604.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: zeromq_sub_msg_source_0_0
   id: zeromq_sub_msg_source
   parameters:
-    address: tcp://127.0.0.1:50001
+    address: '"tcp://"+ip+":50001"'
     affinity: ''
     alias: ''
+    bind: 'False'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -2931,9 +3188,12 @@ connections:
 - [learning_dl_demod_0, '2', blocks_char_to_float_0_0_0, '0']
 - [learning_dl_demod_0, '2', blocks_repack_bits_bb_0_0_1, '0']
 - [learning_dl_demod_0, losses, zeromq_pub_msg_sink_0_0_0, in]
+- [learning_sweeper_0, '0', bokehgui_vector_sink_x_0, '0']
 - [learning_sweeper_0, '0', qtgui_vector_sink_f_0_0, '0']
+- [learning_sweeper_0, '1', bokehgui_vector_sink_x_0, '1']
 - [learning_sweeper_0, '1', qtgui_vector_sink_f_0_0, '1']
 - [uhd_usrp_source_0, '0', blocks_delay_0, '0']
+- [uhd_usrp_source_0, '0', bokehgui_frequency_sink_x_0, '0']
 - [uhd_usrp_source_0, '0', digital_ofdm_sync_sc_cfb_0, '0']
 - [uhd_usrp_source_0, '0', qtgui_freq_sink_x_0, '0']
 - [virtual_source_0, '0', fft_vxx_0, '0']

@@ -26,6 +26,10 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow as tf
 import pmt
 import time
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS']='1'
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+# os.environ["TF_XLA_FLAGS"] = "tf_xla_auto_jit=2"
 
 class dl_demod(gr.basic_block):
     """
@@ -59,7 +63,7 @@ class dl_demod(gr.basic_block):
         self.learning_rate = lr
         self.training = True if on==1 else False
         self.epochs = 1
-
+        print("Newwwww!!!!!!!!!!!!!!!!!!!!!!")
         #Create model
         self.model = self.RX_Model(self.real_chan_uses, self.bits_per_msg)
 
@@ -75,8 +79,8 @@ class dl_demod(gr.basic_block):
 
     def RX_Model(self, input_size = 2, output_size = 2):
         model = tf.keras.models.Sequential([
-          tf.keras.layers.Dense(2**(output_size+1), activation='relu', input_shape=(input_size,)),
-          tf.keras.layers.Dense(2**output_size, activation='relu'),
+          tf.keras.layers.Dense(2**(output_size+1), activation='elu', input_shape=(input_size,)),
+          tf.keras.layers.Dense(2**output_size, activation='elu'),
         ])
         if self.bitwise:
             model.add(tf.keras.layers.Dense(output_size, activation=None))  # Bitwise
@@ -117,19 +121,12 @@ class dl_demod(gr.basic_block):
             ninput_items_required[i] = self.packet_len*self.batch_size
 
 
-    # @tf.function
+    @tf.function
     def train(self, input, label, bitwise):
         with tf.GradientTape(persistent=False) as tape:
-            estimation = self.model(input)
-            loss = self.loss_function(label, estimation)
-            if bitwise:
-                overall_loss = tf.reduce_sum(loss, axis=1)  # Bitwise
-            else:
-                overall_loss = loss  # Symbol wise
+            estimation, overall_loss = self.inference(input, label, bitwise)
             mean_loss = tf.reduce_mean(overall_loss, axis=0)
-
-        rx_grad = tape.gradient(mean_loss, self.model.trainable_variables) # tape is lost after this line when persitence is off
-        self.optimizer.apply_gradients(zip(rx_grad, self.model.trainable_variables))
+        self.optimizer.minimize(mean_loss, self.model.trainable_variables, tape=tape)
         return estimation
 
     @tf.function
@@ -158,9 +155,14 @@ class dl_demod(gr.basic_block):
 
         #Verify presence of tags? Not mandatory
         tags0 = self.get_tags_in_window(0,  0 , samples, pmt.intern(self.tag_name))
+        tags1 = self.get_tags_in_window(0,  0 , samples, pmt.intern(self.tag_name))
 
         if len(tags0) == 0 :
             print("RX : We are missing tags at input")
+        if len(tags1) == 0 :
+            print("RX : We are missing tags at input1")
+        if pmt.to_python(tags0[0].value) != pmt.to_python(tags1[0].value):
+            print("RX : Tag mismatch between inputs")
 
         lengths = []
         numbers = []
@@ -223,6 +225,17 @@ class dl_demod(gr.basic_block):
 
         # output_items[0][:self.packet_len*self.batch_size] = output_bits
         output_items[2][:samples] = labels[:samples]
+
+
+        tags0 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
+        tags1 = self.get_tags_in_window(0,  0 , 1, pmt.intern(self.tag_name))
+
+        if len(tags0) == 0 :
+            print("RX : We are missing tags at input")
+        if len(tags1) == 0 :
+            print("RX : We are missing tags at input1")
+        if pmt.to_python(tags0[0].value) != pmt.to_python(tags1[0].value):
+            print("RX : Tag mismatch between inputs")
 
         self.consume(0, samples)
         self.consume(1, samples)

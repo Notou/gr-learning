@@ -87,6 +87,11 @@ outputs:
   dtype: complex
   vlen: 1
   optional: 1
+- label: points
+  domain: stream
+  dtype: complex
+  vlen: ${2**bitspmsg}
+  optional: 1
 
 #  'file_format' specifies the version of the GRC yml format used in the file
 #  and should usually not be changed.

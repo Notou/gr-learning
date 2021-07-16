@@ -30,21 +30,22 @@ namespace gr {
   namespace learning {
 
     align::sptr
-    align::make(char* tag_name, int frame_size, int vec_len, int user_symbols)
+    align::make(char* tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
     {
       return gnuradio::get_initial_sptr
-        (new align_impl(tag_name, frame_size, vec_len, user_symbols));
+        (new align_impl(tag_name, frame_size, label_frame_size, vec_len, user_symbols));
     }
 
 
     /*
      * The private constructor
      */
-    align_impl::align_impl(char* tag_name, int frame_size, int vec_len, int user_symbols)
+    align_impl::align_impl(char* tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
       : gr::block("Align",
               gr::io_signature::make2(2, 2, sizeof(gr_complex)* vec_len, sizeof(char)),
               gr::io_signature::make2(2, 2, sizeof(gr_complex)* vec_len, sizeof(char))),
           d_frame_size(frame_size),
+          d_label_frame_size(label_frame_size),
           d_tag_name(tag_name),
           d_vec_len(vec_len),
           d_user_symbols(user_symbols)
@@ -71,7 +72,7 @@ namespace gr {
     align_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
       ninput_items_required[0] = d_frame_size / d_user_symbols;
-      ninput_items_required[1] = d_frame_size;
+      ninput_items_required[1] = d_label_frame_size;
     }
 
     int
@@ -173,7 +174,7 @@ namespace gr {
         consume(0, position0);
         return 0;
       }
-      if (position1 + d_frame_size > ninput_items[1]) {
+      if (position1 + d_label_frame_size > ninput_items[1]) {
         // printf("%s\n", "Stream 1 too late, consuming");
         consume(1, position1);
         return 0;
@@ -190,16 +191,16 @@ namespace gr {
         printf("%s\n", "Output size not big enough" );
       }
 
-      memcpy(out0, in0 + position0, (d_frame_size/ d_user_symbols)* d_vec_len *sizeof(gr_complex));
-      memcpy(out1, in1 + position1, d_frame_size*sizeof(char));
+      memcpy(out0, in0 + position0, (d_frame_size/ d_user_symbols)* d_vec_len *sizeof(gr_complex)); // The starting position should also be *d_vec_len, right?
+      memcpy(out1, in1 + position1, d_label_frame_size*sizeof(char));
 
       add_item_tag(0, nitems_written(0), pmt::intern("packet_num"), pmt::from_uint64(value0));
-
+      add_item_tag(1, nitems_written(1), pmt::intern("packet_num"), pmt::from_uint64(value0));
       d_previous_packet = value0;
       consume(0, position0 + (d_frame_size/ d_user_symbols));
-      consume(1, position1 + d_frame_size);
+      consume(1, position1 + d_label_frame_size);
       produce(0, (d_frame_size/ d_user_symbols));
-      produce(1, d_frame_size);
+      produce(1, d_label_frame_size);
 
       // Tell runtime system how many output items we produced.
       return 0;

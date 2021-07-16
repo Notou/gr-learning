@@ -29,6 +29,35 @@ import pmt
 import threading
 import time
 import pickle
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS']='1'
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+# os.environ["TF_XLA_FLAGS"] = "tf_xla_auto_jit=2"
+
+codebook_qpsk   = [[[-1,-1],[-1,1],[1,-1],[1,1]]]
+codebook_4pam   = [[[-3,0], [-1,0], [3,0], [1,0]]]
+codebook_8psk   = [[[-1,-1], [-np.sqrt(2.0),0], [0,np.sqrt(2.0)], [-1,1], [0,-np.sqrt(2.0)], [1,-1], [1,1], [np.sqrt(2.0),0]]]
+codebook_16qam  = [[[-3,-3], [-3,-1], [-3,3], [-3,1], [-1,-3], [-1,-1], [-1,3], [-1,1], [3,-3], [3,-1], [3,3], [3,1], [1,-3], [1,-1], [1,3], [1,1]]]
+codebook_64qam  = [[[3,3], [3,1], [3,5], [3,7], [3,-3], [3,-1], [3,-5], [3,-7], [1,3], [1,1], [1,5], [1,7], [1,-3], [1,-1], [1,-5], [1,-7],
+                  [5,3], [5,1], [5,5], [5,7], [5,-3], [5,-1], [5,-5], [5,-7], [7,3], [7,1], [7,5], [7,7], [7,-3], [7,-1], [7,-5], [7,-7],
+                  [-3,3], [-3,1], [-3,5], [-3,7], [-3,-3], [-3,-1], [-3,-5], [-3,-7], [-1,3], [-1,1], [-1,5], [-1,7], [-1,-3], [-1,-1], [-1,-5], [-1,-7],
+                  [-5,3], [-5,1], [-5,5], [-5,7], [-5,-3], [-5,-1], [-5,-5], [-5,-7], [-7,3], [-7,1], [-7,5], [-7,7], [-7,-3], [-7,-1], [-7,-5], [-7,-7]]]
+codebook_256qam = [[[-15,15],[-15,13],[-15,9],[-15,11],[-15,1],[-15,3],[-15,7],[-15,5],[-15,-15],[-15,-13],[-15,-9],[-15,-11],[-15,-1],[-15,-3],[-15,-7],[-15,-5],
+                   [-13,15],[-13,13],[-13,9],[-13,11],[-13,1],[-13,3],[-13,7],[-13,5],[-13,-15],[-13,-13],[-13,-9],[-13,-11],[-13,-1],[-13,-3],[-13,-7],[-13,-5],
+                   [-9,15],[-9,13],[-9,9],[-9,11],[-9,1],[-9,3],[-9,7],[-9,5],[-9,-15],[-9,-13],[-9,-9],[-9,-11],[-9,-1],[-9,-3],[-9,-7],[-9,-5],
+                   [-11,15],[-11,13],[-11,9],[-11,11],[-11,1],[-11,3],[-11,7],[-11,5],[-11,-15],[-11,-13],[-11,-9],[-11,-11],[-11,-1],[-11,-3],[-11,-7],[-11,-5],
+                   [-1,15],[-1,13],[-1,9],[-1,11],[-1,1],[-1,3],[-1,7],[-1,5],[-1,-15],[-1,-13],[-1,-9],[-1,-11],[-1,-1],[-1,-3],[-1,-7],[-1,-5],
+                   [-3,15],[-3,13],[-3,9],[-3,11],[-3,1],[-3,3],[-3,7],[-3,5],[-3,-15],[-3,-13],[-3,-9],[-3,-11],[-3,-1],[-3,-3],[-3,-7],[-3,-5],
+                   [-7,15],[-7,13],[-7,9],[-7,11],[-7,1],[-7,3],[-7,7],[-7,5],[-7,-15],[-7,-13],[-7,-9],[-7,-11],[-7,-1],[-7,-3],[-7,-7],[-7,-5],
+                   [-5,15],[-5,13],[-5,9],[-5,11],[-5,1],[-5,3],[-5,7],[-5,5],[-5,-15],[-5,-13],[-5,-9],[-5,-11],[-5,-1],[-5,-3],[-5,-7],[-5,-5],
+                   [15,15],[15,13],[15,9],[15,11],[15,1],[15,3],[15,7],[15,5],[15,-15],[15,-13],[15,-9],[15,-11],[15,-1],[15,-3],[15,-7],[15,-5],
+                   [13,15],[13,13],[13,9],[13,11],[13,1],[13,3],[13,7],[13,5],[13,-15],[13,-13],[13,-9],[13,-11],[13,-1],[13,-3],[13,-7],[13,-5],
+                   [9,15],[9,13],[9,9],[9,11],[9,1],[9,3],[9,7],[9,5],[9,-15],[9,-13],[9,-9],[9,-11],[9,-1],[9,-3],[9,-7],[9,-5],
+                   [11,15],[11,13],[11,9],[11,11],[11,1],[11,3],[11,7],[11,5],[11,-15],[11,-13],[11,-9],[11,-11],[11,-1],[11,-3],[11,-7],[11,-5],
+                   [1,15],[1,13],[1,9],[1,11],[1,1],[1,3],[1,7],[1,5],[1,-15],[1,-13],[1,-9],[1,-11],[1,-1],[1,-3],[1,-7],[1,-5],
+                   [3,15],[3,13],[3,9],[3,11],[3,1],[3,3],[3,7],[3,5],[3,-15],[3,-13],[3,-9],[3,-11],[3,-1],[3,-3],[3,-7],[3,-5],
+                   [7,15],[7,13],[7,9],[7,11],[7,1],[7,3],[7,7],[7,5],[7,-15],[7,-13],[7,-9],[7,-11],[7,-1],[7,-3],[7,-7],[7,-5],
+                   [5,15],[5,13],[5,9],[5,11],[5,1],[5,3],[5,7],[5,5],[5,-15],[5,-13],[5,-9],[5,-11],[5,-1],[5,-3],[5,-7],[5,-5]]]
 
 class rl_mod(gr.basic_block):
     """
@@ -38,7 +67,7 @@ class rl_mod(gr.basic_block):
         gr.basic_block.__init__(self,
             name="rl_mod",
             in_sig=[np.int8, ],
-            out_sig=[np.complex64, np.complex64])
+            out_sig=[np.complex64, np.complex64, (np.complex64,2**bpmsg)])
 
         self.tag_name = tag_name
         self.packet_len = packet_len
@@ -64,6 +93,17 @@ class rl_mod(gr.basic_block):
 
         # self.model = self.TX_Model(self.bits_per_msg, self.real_chan_uses)
         self.embedding = tf.Variable(tf.random.uniform([2**self.bits_per_msg,self.real_chan_uses], minval=-2, maxval=2), trainable=True)
+        if self.bits_per_msg == 2:
+            self.embedding = tf.Variable(np.array(codebook_qpsk[0],dtype=np.float32), trainable=True)
+        if self.bits_per_msg == 3:
+            self.embedding = tf.Variable(np.array(codebook_8psk[0],dtype=np.float32), trainable=True)
+        if self.bits_per_msg == 4:
+            self.embedding = tf.Variable(np.array(codebook_16qam[0],dtype=np.float32), trainable=True)
+        if self.bits_per_msg == 6:
+            self.embedding = tf.Variable(np.array(codebook_64qam[0],dtype=np.float32), trainable=True)
+        if self.bits_per_msg == 8:
+            self.embedding = tf.Variable(np.array(codebook_256qam[0],dtype=np.float32), trainable=True)
+
 
         self.optimizer = tf.optimizers.Adam(self.learning_rate)
 
@@ -155,8 +195,8 @@ class rl_mod(gr.basic_block):
         norm = self.embedding/tf.reduce_mean(tf.norm(self.embedding,axis=1, ord=2))
         clean = tf.nn.embedding_lookup(norm, input)
 
-        noisy = tf.stop_gradient(clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
-        loss = -1 * tf.reduce_sum(tf.square(noisy-clean), axis=1)/(self.exploration_noise**2)
+        noisy = tf.stop_gradient(np.sqrt(1-self.exploration_noise**2)*clean + tf.random.normal(clean.shape, stddev=self.exploration_noise))
+        loss = -2 * tf.reduce_sum(tf.abs(noisy-clean), axis=1)/(self.exploration_noise**2)
         return loss, noisy, clean
 
     def general_work(self, input_items, output_items):
@@ -215,6 +255,13 @@ class rl_mod(gr.basic_block):
             output_samples = self.packet_len*self.batch_size
 
 
+        #Output constellation points
+        msg = np.arange(2**self.bits_per_msg, dtype = np.int32)
+        output = self.inference(msg).numpy().view(dtype=np.complex64)[:,0]
+        output_items[2][0] = output
 
         self.consume(0, output_samples)        #self.consume_each(len(input_items[0]))
-        return output_samples
+        self.produce(0, output_samples)
+        self.produce(1, output_samples)
+        self.produce(2, 1)
+        return 0

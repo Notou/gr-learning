@@ -8,7 +8,7 @@ templates:
   - start_sweep()
   - stop_sweep()
   - set_error_count(${errors})
-  make: learning.sweeper(self, ${snrs}, ${error_threshold}, ${ber_id}, ${probe_id}, self.set_${snr_var})
+  make: learning.sweeper(self, ${snrs}, ${error_threshold}, ${ber_id_1}, ${ber_id_2}, ${probe_id_1}, ${probe_id_2}, self.set_${snr_var})
 
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
@@ -24,17 +24,23 @@ parameters:
   label: SNR sweep array
   dtype: float_vector
 - id: errors
-  label: Errors
+  label: Error (trigger)
   dtype: int
   default: '0'
 - id: error_threshold
   label: Error threshold
   dtype: int
   default: '100'
-- id: ber_id
+- id: ber_id_1
   label: BER block id
   dtype: string
-- id: probe_id
+- id: ber_id_2
+  label: BER block id
+  dtype: string
+- id: probe_id_1
+  label: Probe block id
+  dtype: string
+- id: probe_id_2
   label: Probe block id
   dtype: string
 
