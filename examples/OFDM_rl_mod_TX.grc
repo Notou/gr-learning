@@ -180,7 +180,7 @@ blocks:
     bus_structure: null
     coordinate: [1176, 124.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: ldpc_enc
   id: variable_ldpc_encoder_def
   parameters:
@@ -829,7 +829,7 @@ blocks:
     bus_structure: null
     coordinate: [1192, 748.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_tagged_stream_to_pdu_0_0_0
   id: blocks_tagged_stream_to_pdu
   parameters:
@@ -884,7 +884,7 @@ blocks:
     bus_structure: null
     coordinate: [1040, 748.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: bokehgui_time_const_x_0
   id: bokehgui_time_const_x
   parameters:
@@ -1183,7 +1183,7 @@ blocks:
     bus_structure: null
     coordinate: [1072, 12.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: learning_rl_mod_0
   id: learning_rl_mod
   parameters:
@@ -1595,7 +1595,7 @@ blocks:
     bus_structure: null
     coordinate: [1184, 604.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: virtual_sink_0_0_0_0
   id: virtual_sink
   parameters:
@@ -1650,7 +1650,7 @@ blocks:
     bus_structure: null
     coordinate: [1392, 740.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: zeromq_pub_msg_sink_0_0
   id: zeromq_pub_msg_sink
   parameters:

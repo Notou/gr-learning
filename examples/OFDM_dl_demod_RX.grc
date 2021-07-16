@@ -212,7 +212,7 @@ blocks:
     bus_structure: null
     coordinate: [432, 260.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: label_ber
   id: variable_bokehgui_label
   parameters:
@@ -1052,7 +1052,7 @@ blocks:
     bus_structure: null
     coordinate: [216, 612.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_pdu_to_tagged_stream_0_0
   id: blocks_pdu_to_tagged_stream
   parameters:
@@ -1199,7 +1199,7 @@ blocks:
     bus_structure: null
     coordinate: [440, 612.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_vector_to_stream_1
   id: blocks_vector_to_stream
   parameters:
@@ -2087,7 +2087,7 @@ blocks:
     bus_structure: null
     coordinate: [272, 252.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: learning_align_0
   id: learning_align
   parameters:
@@ -2611,7 +2611,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1200, 1900.0]
+    coordinate: [1208, 1844.0]
     rotation: 0
     state: disabled
 - name: uhd_usrp_source_0
@@ -2984,7 +2984,7 @@ blocks:
     bus_structure: null
     coordinate: [66, 901]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -3109,7 +3109,7 @@ blocks:
     bus_structure: null
     coordinate: [0, 604.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: zeromq_sub_msg_source_0_0
   id: zeromq_sub_msg_source
   parameters:
