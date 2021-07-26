@@ -696,6 +696,23 @@ blocks:
     coordinate: [808, 660.0]
     rotation: 0
     state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: 2**bits_per_symbol
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1520, 672.0]
+    rotation: 0
+    state: true
 - name: blocks_repack_bits_bb_0_0
   id: blocks_repack_bits_bb
   parameters:
@@ -733,7 +750,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1032, 308.0]
+    coordinate: [1056, 308.0]
     rotation: 0
     state: enabled
 - name: blocks_stream_to_tagged_stream_0_0
@@ -790,9 +807,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1664, 520.0]
+    coordinate: [1720, 508.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_tagged_stream_mux_0
   id: blocks_tagged_stream_mux
   parameters:
@@ -810,7 +827,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1472, 352.0]
+    coordinate: [1496, 352.0]
     rotation: 0
     state: enabled
 - name: blocks_tagged_stream_to_pdu_0_0
@@ -979,7 +996,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1472, 564.0]
+    coordinate: [1488, 548.0]
     rotation: 0
     state: enabled
 - name: digital_chunks_to_symbols_xx_0
@@ -999,7 +1016,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1208, 320.0]
+    coordinate: [1232, 320.0]
     rotation: 0
     state: enabled
 - name: digital_chunks_to_symbols_xx_0_0
@@ -1019,7 +1036,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1184, 384.0]
+    coordinate: [1208, 384.0]
     rotation: 0
     state: disabled
 - name: digital_ofdm_carrier_allocator_cvc_0
@@ -1206,7 +1223,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1184, 420.0]
+    coordinate: [1208, 420.0]
     rotation: 0
     state: enabled
 - name: learning_tag_numerotation_0
@@ -1317,7 +1334,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1472, 492.0]
+    coordinate: [1512, 444.0]
     rotation: 0
     state: disabled
 - name: uhd_usrp_sink_0
@@ -1606,7 +1623,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1696, 364.0]
+    coordinate: [1720, 364.0]
     rotation: 0
     state: enabled
 - name: virtual_sink_1_0_0
@@ -1682,7 +1699,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [968, 500.0]
+    coordinate: [992, 500.0]
     rotation: 0
     state: true
 
@@ -1708,10 +1725,11 @@ connections:
 - [digital_protocol_formatter_bb_0, '0', blocks_repack_bits_bb_0_0_0, '0']
 - [fec_extended_encoder_1_0_0, '0', blocks_repack_bits_bb_0_0, '0']
 - [fft_vxx_0_0, '0', digital_ofdm_cyclic_prefixer_0, '0']
+- [learning_rl_mod_0, '0', blocks_tag_debug_1, '0']
 - [learning_rl_mod_0, '0', blocks_tagged_stream_mux_0, '1']
-- [learning_rl_mod_0, '1', blocks_tag_debug_1, '0']
 - [learning_rl_mod_0, '1', bokehgui_time_const_x_0, '0']
 - [learning_rl_mod_0, '1', qtgui_const_sink_x_0_0, '0']
+- [learning_rl_mod_0, '2', blocks_null_sink_0, '0']
 - [learning_tag_numerotation_0, '0', blocks_tag_debug_0, '0']
 - [learning_tag_numerotation_0, '0', blocks_throttle_0, '0']
 - [learning_tag_numerotation_0, '0', digital_chunks_to_symbols_xx_0_0, '0']
