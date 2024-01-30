@@ -40,7 +40,7 @@ outputs:
     optional: true
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.error_estimator(${tag_name}, ${interval}, ${type.fcn}, ${packet_loss_penalty})
 
 file_format: 1

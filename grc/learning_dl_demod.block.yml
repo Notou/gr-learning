@@ -3,7 +3,7 @@ label: DL Demod
 category: '[learning]'
 
 templates:
-  imports: import learning
+  imports: from gnuradio import learning
   make: learning.dl_demod(${tag_name}, ${bitwise}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${tstate}, ${folder})
   callbacks:
   - reset()

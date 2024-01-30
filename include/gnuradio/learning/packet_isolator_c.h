@@ -22,7 +22,7 @@
 #ifndef INCLUDED_LEARNING_PACKET_ISOLATOR_C_H
 #define INCLUDED_LEARNING_PACKET_ISOLATOR_C_H
 
-#include <learning/api.h>
+#include <gnuradio/learning/api.h>
 #include <gnuradio/block.h>
 
 namespace gr {
@@ -36,7 +36,7 @@ namespace gr {
     class LEARNING_API packet_isolator_c : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<packet_isolator_c> sptr;
+      typedef std::shared_ptr<packet_isolator_c> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of learning::packet_isolator_c.
@@ -46,7 +46,7 @@ namespace gr {
        * class. learning::packet_isolator_c::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int payload_length=0, int preamble_length = 80, int lookup_window = 30, char* tag_name = "corr_est");
+      static sptr make(int payload_length=0, int preamble_length = 80, int lookup_window = 30, std::string tag_name = "corr_est");
     };
 
   } // namespace learning

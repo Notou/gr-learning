@@ -30,7 +30,7 @@ namespace gr {
   namespace learning {
 
     align::sptr
-    align::make(char* tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
+    align::make(std::string tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
     {
       return gnuradio::get_initial_sptr
         (new align_impl(tag_name, frame_size, label_frame_size, vec_len, user_symbols));
@@ -40,7 +40,7 @@ namespace gr {
     /*
      * The private constructor
      */
-    align_impl::align_impl(char* tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
+    align_impl::align_impl(std::string tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
       : gr::block("Align",
               gr::io_signature::make2(2, 2, sizeof(gr_complex)* vec_len, sizeof(char)),
               gr::io_signature::make2(2, 2, sizeof(gr_complex)* vec_len, sizeof(char))),

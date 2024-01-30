@@ -27,7 +27,7 @@ outputs:
     dtype: complex
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.packet_isolator(${pack_len}, ${pay_len}, ${lookup_len})
 
 file_format: 1

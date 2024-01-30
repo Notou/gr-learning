@@ -31,7 +31,7 @@ outputs:
     dtype: byte
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.packet_header(${header_byte_length}, ${preamble_byte_length}, ${tag_name},
         ${payload_byte_length})
 

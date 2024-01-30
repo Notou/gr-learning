@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_PACKET_ISOLATOR_C_IMPL_H
 #define INCLUDED_LEARNING_PACKET_ISOLATOR_C_IMPL_H
 
-#include <learning/packet_isolator_c.h>
+#include <gnuradio/learning/packet_isolator_c.h>
 
 namespace gr {
   namespace learning {
@@ -36,7 +36,7 @@ namespace gr {
        int d_transmit_preamble;
        int d_transmit_from_last_call;
        int to_transmit;
-       char* d_tag_name;
+       std::string d_tag_name;
 
        long d_packet_number;
        uint64_t read;
@@ -53,7 +53,7 @@ namespace gr {
        uint64_t last_transmitted_offset;
 
      public:
-      packet_isolator_c_impl(int payload_length, int preamble_length, int lookup_window, char* tag_name);
+      packet_isolator_c_impl(int payload_length, int preamble_length, int lookup_window, std::string tag_name);
       ~packet_isolator_c_impl();
 
       // Where all the action really happens

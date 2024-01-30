@@ -33,7 +33,7 @@ outputs:
     dtype: ${ type }
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.tag_numerotation(${tag_name}, ${interval}, ${modulo}, ${type.fcn})
 
 file_format: 1

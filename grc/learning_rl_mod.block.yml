@@ -3,7 +3,7 @@ label: RL Mod
 category: '[learning]'
 
 templates:
-  imports: import learning
+  imports: from gnuradio import learning
   make: learning.rl_mod(${tag_name}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${explo_noise}, ${state}, ${folder})
   callbacks:
   - reset()

@@ -38,7 +38,7 @@ outputs:
     dtype: complex
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.sync_rl_preprocessor(${frame_size}, ${hidden_units}, ${batch_size},
         ${val}, ${learning_rate})
     callbacks:

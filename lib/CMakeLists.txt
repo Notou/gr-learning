@@ -87,3 +87,24 @@ GR_LIBRARY_FOO(gnuradio-learning)
 ########################################################################
 message(STATUS "Using install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "Building for version: ${VERSION} / ${LIBVER}")
+
+########################################################################
+# Build and register unit test
+########################################################################
+include(GrTest)
+
+# If your unit tests require special include paths, add them here
+#include_directories()
+# List all files that contain Boost.UTF unit tests here
+list(APPEND test_learning_sources)
+# Anything we need to link to for the unit tests go here
+list(APPEND GR_TEST_TARGET_DEPS gnuradio-learning)
+
+if(NOT test_learning_sources)
+    message(STATUS "No C++ unit tests... skipping")
+    return()
+endif(NOT test_learning_sources)
+
+foreach(qa_file ${test_learning_sources})
+    gr_add_cpp_test("learning_${qa_file}" ${CMAKE_CURRENT_SOURCE_DIR}/${qa_file})
+endforeach(qa_file)

@@ -2,7 +2,7 @@ id: learning_align
 label: Align
 category: '[learning]'
 templates:
-  imports: import learning
+  imports: from gnuradio import learning
   make: learning.align(${tag_name}, ${frame_size}, ${label_frame_size}, ${vec_len}, ${user_symbols})
 parameters:
 - id: tag_name

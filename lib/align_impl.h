@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_ALIGN_IMPL_H
 #define INCLUDED_LEARNING_ALIGN_IMPL_H
 
-#include <learning/align.h>
+#include <gnuradio/learning/align.h>
 
 namespace gr {
   namespace learning {
@@ -30,7 +30,7 @@ namespace gr {
     {
      private:
       // Nothing to declare in this block.
-      char* d_tag_name;
+      std::string d_tag_name;
       int d_frame_size;
       int d_label_frame_size;
       int d_user_symbols;
@@ -40,7 +40,7 @@ namespace gr {
       int d_last_packet_loss = -1;
 
      public:
-      align_impl(char* tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols);
+      align_impl(std::string tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols);
       ~align_impl();
 
       // Where all the action really happens

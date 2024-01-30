@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_BER_BF_IMPL_H
 #define INCLUDED_LEARNING_BER_BF_IMPL_H
 
-#include <learning/ber_bf.h>
+#include <gnuradio/learning/ber_bf.h>
 
 namespace gr {
   namespace learning {

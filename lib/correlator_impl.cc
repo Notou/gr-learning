@@ -84,11 +84,11 @@ namespace gr {
       set_output_multiple(nsamples);
       GR_LOG_WARN(d_logger, boost::format("Corr est %1% taps: ")
                  % d_filter->ntaps());
-      std::string ta;
-      for (size_t i = 0; i < d_filter->ntaps(); i++) {
-        ta.append(boost::to_string(d_filter->taps()[i]));
-      }
-      GR_LOG_WARN(d_logger, ta);
+      // std::string ta;
+      // for (size_t i = 0; i < d_filter->ntaps(); i++) {
+      //   ta.append(std::to_string(d_filter->taps()[i]));
+      // }
+      // GR_LOG_WARN(d_logger, ta);
       // It looks like the kernel::fft_filter_ccc stashes a tail between
       // calls, so that contains our filtering history (I think).  The
       // fft_filter_ccc block (which calls the kernel::fft_filter_ccc) sets

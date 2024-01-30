@@ -22,7 +22,7 @@
 #ifndef INCLUDED_LEARNING_CORRELATOR_H
 #define INCLUDED_LEARNING_CORRELATOR_H
 
-#include <learning/api.h>
+#include <gnuradio/learning/api.h>
 #include <gnuradio/sync_block.h>
 
 namespace gr {
@@ -36,7 +36,7 @@ namespace gr {
     class LEARNING_API correlator : virtual public gr::sync_block
     {
      public:
-      typedef boost::shared_ptr<correlator> sptr;
+      typedef std::shared_ptr<correlator> sptr;
 
       enum tm_type {
         THRESHOLD_DYNAMIC,

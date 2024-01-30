@@ -30,7 +30,7 @@ namespace gr {
   namespace learning {
 
     packet_isolator_c::sptr
-    packet_isolator_c::make(int payload_length, int preamble_length, int lookup_window, char* tag_name)
+    packet_isolator_c::make(int payload_length, int preamble_length, int lookup_window, std::string tag_name)
     {
       return gnuradio::get_initial_sptr
       (new packet_isolator_c_impl(payload_length, preamble_length, lookup_window, tag_name));
@@ -39,7 +39,7 @@ namespace gr {
     /*
     * The private constructor
     */
-    packet_isolator_c_impl::packet_isolator_c_impl(int payload_length, int preamble_length, int lookup_window, char* tag_name)
+    packet_isolator_c_impl::packet_isolator_c_impl(int payload_length, int preamble_length, int lookup_window, std::string tag_name)
     : gr::block("packet_isolator_c",
     gr::io_signature::make(1, 1, sizeof(gr_complex)),
     gr::io_signature::make(1, 1, sizeof(gr_complex)))

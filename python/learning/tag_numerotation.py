@@ -64,7 +64,7 @@ class tag_numerotation(gr.sync_block):
         written = self.nitems_written(0)
 
         while self.interval * self.index < written+len(output_items[0]):
-            self.add_item_tag( 0, self.interval * self.index, pmt.intern(self.tag_name), pmt.to_pmt(int(self.index % self.modulo)), self.id)
+            self.add_item_tag( 0, int(self.interval * self.index), pmt.intern(self.tag_name), pmt.to_pmt(int(self.index % self.modulo)), self.id)
             self.index = (self.index + 1)
 
         # for i in range(self.offset, input_size, self.interval):

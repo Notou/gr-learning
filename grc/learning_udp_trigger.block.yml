@@ -25,7 +25,7 @@ outputs:
     id: out
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.udp_trigger(${tx_number},${ip},${port})
 
 file_format: 1

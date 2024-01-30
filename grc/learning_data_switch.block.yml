@@ -49,7 +49,7 @@ outputs:
     multiplicity: ${ tx_amount }
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.data_switch(${tx_amount}, ${header_size}, ${payload_size}, ${to_server},
         ${address}, ${port})
 

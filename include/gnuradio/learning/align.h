@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_ALIGN_H
 #define INCLUDED_LEARNING_ALIGN_H
 
-#include <learning/api.h>
+#include <gnuradio/learning/api.h>
 #include <gnuradio/block.h>
 
 namespace gr {
@@ -35,7 +35,7 @@ namespace gr {
     class LEARNING_API align : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<align> sptr;
+      typedef std::shared_ptr<align> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of learning::align.
@@ -45,7 +45,7 @@ namespace gr {
        * class. learning::align::make is the public interface for
        * creating new instances.
        */
-      static sptr make(char* tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols);
+      static sptr make(std::string tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols);
     };
 
   } // namespace learning

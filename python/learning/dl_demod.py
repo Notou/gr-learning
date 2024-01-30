@@ -115,10 +115,13 @@ class dl_demod(gr.basic_block):
         self.resetting = True
 
 
-    def forecast(self, noutput_items, ninput_items_required):
+
+    def forecast(self, noutput_items, ninputs):
         #setup size of input_items[i] for work call
-        for i in range(len(ninput_items_required)):
-            ninput_items_required[i] = self.packet_len*self.batch_size
+        ninput_items_required = []
+        for i in range(ninputs):
+            ninput_items_required.append(self.packet_len*self.batch_size)
+        return ninput_items_required
 
 
     @tf.function

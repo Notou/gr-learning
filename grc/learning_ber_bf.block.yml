@@ -3,7 +3,7 @@ label: BER (learning)
 category: '[learning]'
 
 templates:
-  imports: import learning
+  imports: from gnuradio import learning
   make: learning.ber_bf(${test_mode}, ${berminerrors}, ${ber_limit}, ${bitsperbyte})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.

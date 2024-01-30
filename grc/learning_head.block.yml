@@ -42,7 +42,7 @@ asserts:
 - ${ vlen > 0 }
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.head(${type.size}*${vlen}, ${num_items}, ${blocking})
     callbacks:
     - set_length(${num_items})

@@ -3,7 +3,7 @@ label: Sweeper
 category: '[learning]'
 
 templates:
-  imports: import learning
+  imports: from gnuradio import learning
   callbacks:
   - start_sweep()
   - stop_sweep()

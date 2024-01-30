@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_HEAD_IMPL_H
 #define INCLUDED_LEARNING_HEAD_IMPL_H
 
-#include <learning/head.h>
+#include <gnuradio/learning/head.h>
 
 namespace gr {
   namespace learning {

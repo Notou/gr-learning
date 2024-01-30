@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_CORRELATOR_IMPL_H
 #define INCLUDED_LEARNING_CORRELATOR_IMPL_H
 
-#include <learning/correlator.h>
+#include <gnuradio/learning/correlator.h>
 #include <gnuradio/filter/fft_filter.h>
 
 using namespace gr::filter;

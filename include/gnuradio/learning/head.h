@@ -22,7 +22,7 @@
 #ifndef INCLUDED_LEARNING_HEAD_H
 #define INCLUDED_LEARNING_HEAD_H
 
-#include <learning/api.h>
+#include <gnuradio/learning/api.h>
 #include <gnuradio/block.h>
 
 namespace gr {
@@ -36,7 +36,7 @@ namespace gr {
     class LEARNING_API head : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<head> sptr;
+      typedef std::shared_ptr<head> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of learning::head.

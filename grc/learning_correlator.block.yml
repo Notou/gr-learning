@@ -37,7 +37,7 @@ outputs:
     optional: true
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.correlator(${symbols}, ${sps}, ${mark_delay}, ${threshold})
     callbacks:
     - set_mark_delay(${mark_delay})

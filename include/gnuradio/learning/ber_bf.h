@@ -21,7 +21,7 @@
 #ifndef INCLUDED_LEARNING_BER_BF_H
 #define INCLUDED_LEARNING_BER_BF_H
 
-#include <learning/api.h>
+#include <gnuradio/learning/api.h>
 #include <gnuradio/block.h>
 
 namespace gr {
@@ -61,7 +61,7 @@ namespace gr {
     class LEARNING_API ber_bf : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<ber_bf> sptr;
+      typedef std::shared_ptr<ber_bf> sptr;
 
       /*!
        * Get total number of errors counter value.

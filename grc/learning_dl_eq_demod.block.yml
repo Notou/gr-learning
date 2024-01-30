@@ -3,7 +3,7 @@ label: DL Demod with EQ
 category: '[learning]'
 
 templates:
-  imports: import learning
+  imports: from gnuradio import learning
   make: learning.dl_eq_demod(${occupied_carriers}, ${pilot_carriers}, ${tag_name}, ${bitwise}, ${bitspmsg}, ${packet_len}, ${batch_size}, ${training_mod}, ${lr}, ${tstate}, ${vec_len})
   callbacks:
   - reset()

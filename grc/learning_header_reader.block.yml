@@ -35,7 +35,7 @@ outputs:
     dtype: byte
 
 templates:
-    imports: import learning
+    imports: from gnuradio import learning
     make: learning.header_reader(${header_byte_length}, ${preamble_byte_length}, ${tag_name},
         ${new_tag_name}, ${threshold})
 
