@@ -82,8 +82,7 @@ namespace gr {
       int nsamples;
       nsamples = d_filter->set_taps(d_symbols);
       set_output_multiple(nsamples);
-      GR_LOG_WARN(d_logger, boost::format("Corr est %1% taps: ")
-                 % d_filter->ntaps());
+  d_logger->warn("Corr est {} taps: ", d_filter->ntaps());
       // std::string ta;
       // for (size_t i = 0; i < d_filter->ntaps(); i++) {
       //   ta.append(std::to_string(d_filter->taps()[i]));
@@ -172,14 +171,9 @@ namespace gr {
     {
       d_stashed_mark_delay = mark_delay;
 
-      if(mark_delay >= d_symbols.size()) {
-        d_mark_delay = d_symbols.size()-1;
-        GR_LOG_WARN(d_logger, boost::format("set_mark_delay: asked for %1% but due "
-                                            "to the symbol size constraints, "
-                                            "mark delay set to %2%.") \
-                    % mark_delay % d_mark_delay);
-      }
-      else {
+    d_logger->warn("set_mark_delay: asked for {} but due to the symbol size "
+                   "constraints, mark delay set to {}.",
+                   mark_delay, d_mark_delay);
         d_mark_delay = mark_delay;
       }
     }

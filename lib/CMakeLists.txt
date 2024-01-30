@@ -23,9 +23,6 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
-
 list(APPEND learning_sources
     packet_isolator_c_impl.cc
     correlator_impl.cc
@@ -75,7 +72,6 @@ GR_LIBRARY_FOO(gnuradio-learning)
 #target_link_libraries(
 #  test-learning
 #  ${GNURADIO_RUNTIME_LIBRARIES}
-#  ${Boost_LIBRARIES}
 #  ${CPPUNIT_LIBRARIES}
 #  gnuradio-learning
 #)

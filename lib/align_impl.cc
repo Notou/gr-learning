@@ -42,18 +42,10 @@ namespace gr {
      */
     align_impl::align_impl(std::string tag_name, int frame_size, int label_frame_size, int vec_len, int user_symbols)
       : gr::block("Align",
-              gr::io_signature::make2(2, 2, sizeof(gr_complex)* vec_len, sizeof(char)),
-              gr::io_signature::make2(2, 2, sizeof(gr_complex)* vec_len, sizeof(char))),
-          d_frame_size(frame_size),
-          d_label_frame_size(label_frame_size),
-          d_tag_name(tag_name),
-          d_vec_len(vec_len),
-          d_user_symbols(user_symbols)
-    {
-      printf("%s\n", d_tag_name);
+  d_logger->info("{}", d_tag_name);
       d_tag_name = "packet_num";
-      printf("%s\n", d_tag_name);
-      printf("BLALALALALALALALALALALALAAAAAAAAAAAAAAAAAAALALALALAL!!!\n");
+  d_logger->info("{}", d_tag_name);
+  d_logger->info("BLALALALALALALALALALALALAAAAAAAAAAAAAAAAAAALALALALAL!!!");
       set_tag_propagation_policy(TPP_DONT);
       set_output_multiple(d_frame_size);
       if (d_vec_len <= 1) {
@@ -183,12 +175,14 @@ namespace gr {
       // Detect packet loss
       if (value0 != d_previous_packet + 1) {
         // printf("%d %d\n", value0, d_previous_packet);
-        printf("Packet lost: %d in a row. Value is: %d Packets since last loss: %d\n", value0-(d_previous_packet+1), value0, value0-d_last_packet_loss);
+    d_logger->warn(
+        "Packet lost: {} in a row. Value is: {} Packets since last loss: {}",
+        value0 - (d_previous_packet + 1), value0, value0 - d_last_packet_loss);
         d_last_packet_loss = value0;
       }
 
       if (noutput_items < d_frame_size) {
-        printf("%s\n", "Output size not big enough" );
+    d_logger->error("Output size not big enough");
       }
 
       memcpy(out0, in0 + position0, (d_frame_size/ d_user_symbols)* d_vec_len *sizeof(gr_complex)); // The starting position should also be *d_vec_len, right?
